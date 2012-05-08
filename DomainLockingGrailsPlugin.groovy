@@ -43,7 +43,12 @@ Brief summary/description of the plugin.
     }
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
+        strictDomainUpdater(jp.co.ntts.grails.plugin.domainlocking.StrictDomainUpdater) {
+            retryCount = 5  // times
+            interval = 1000 // sec
+        }
+
+        optimisticDomainUpdater(jp.co.ntts.grails.plugin.domainlocking.OptimisticDomainUpdater)
     }
 
     def doWithDynamicMethods = { ctx ->
