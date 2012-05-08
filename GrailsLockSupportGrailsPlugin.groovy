@@ -1,4 +1,4 @@
-class GrailsLockSupportGrailsPlugin {
+class GrailsDomainLockingGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
@@ -11,15 +11,15 @@ class GrailsLockSupportGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Grails Lock Support Plugin" // Headline display name of the plugin
-    def author = "Your name"
+    def title = "Grails Domain Locking Plugin" // Headline display name of the plugin
+    def author = "NTT Software"
     def authorEmail = ""
     def description = '''\
 Brief summary/description of the plugin.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/grails-lock-support"
+    def documentation = "http://grails.org/plugin/grails-domain-locking"
 
     // Extra (optional) plugin metadata
 
