@@ -1,3 +1,5 @@
+import jp.co.ntts.grails.plugin.domainlocking.OptimisticLockingUtil
+
 class DomainLockingGrailsPlugin {
     // the plugin version
     def version = "0.1"
@@ -38,33 +40,22 @@ Brief summary/description of the plugin.
     // Online location of the plugin's browseable source code.
 //    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
 
-    def doWithWebDescriptor = { xml ->
-        // TODO Implement additions to web.xml (optional), this event occurs before
-    }
-
-    def doWithSpring = {
-    }
-
-    def doWithDynamicMethods = { ctx ->
-        // TODO Implement registering dynamic methods to classes (optional)
-    }
-
-    def doWithApplicationContext = { applicationContext ->
-        // TODO Implement post initialization spring config (optional)
-    }
-
-    def onChange = { event ->
-        // TODO Implement code that is executed when any artefact that this plugin is
-        // watching is modified and reloaded. The event contains: event.source,
-        // event.application, event.manager, event.ctx, and event.plugin.
-    }
-
-    def onConfigChange = { event ->
-        // TODO Implement code that is executed when the project configuration changes.
-        // The event is the same as for 'onChange'.
-    }
-
-    def onShutdown = { event ->
-        // TODO Implement code that is executed when the application shuts down (optional)
+     def doWithDynamicMethods = { applicationContext ->
+         for (domainClass in application.domainClasses) {
+             // OptimisticLockingUtil
+             // TODO to extract the enhancement into an individual class
+             domainClass.metaClass.saveWithDefaultFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure ->
+                 OptimisticLockingUtil.withDefaultFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure)
+             }
+             domainClass.metaClass.saveWithFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
+                 OptimisticLockingUtil.withFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
+             }
+             domainClass.metaClass.saveWithExtraFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler ->
+                 OptimisticLockingUtil.withExtraFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, extraFailureHandler)
+             }
+             domainClass.metaClass.tryUpdate = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
+                 OptimisticLockingUtil.tryUpdate(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
+             }
+         }
     }
 }
