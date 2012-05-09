@@ -4,9 +4,8 @@ import grails.test.*
 import org.springframework.dao.OptimisticLockingFailureException
 import test.*
 
-class StrictDomainUpdaterTests extends GroovyTestCase {
+class PessimisticLockingUtilTests extends GroovyTestCase {
 
-    def strictDomainUpdater
     def testDomain
 
     private newSavedTestDomain(id) {
@@ -19,8 +18,8 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         testDomain = newSavedTestDomain(1)
 
         // テストしやすいようにデフォルト値から変更しておく
-        strictDomainUpdater.retryCount = 3
-        strictDomainUpdater.interval == 0
+        PessimisticLockingUtil.retryCount = 3
+        PessimisticLockingUtil.interval == 0
     }
 
     protected void tearDown() {
@@ -32,7 +31,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         def testDomains = []
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
             return "OK"
         }
@@ -47,7 +46,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         def testDomains = []
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
             if (testDomains.size() <= 1) { // 1回目は失敗
                 throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
@@ -65,7 +64,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         def testDomains = []
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
             if (testDomains.size() <= 2) { // 2回目までは失敗
                 throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
@@ -83,7 +82,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         def testDomains = []
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
@@ -95,12 +94,12 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
 
     void testWithLockAndRetry_interval() {
         // Setup
-        strictDomainUpdater.interval = 1000 // msec
+        PessimisticLockingUtil.interval = 1000 // msec
         def previousTime = new Date().time // msec
         def wrapTimes = []
 
         // Exercise
-        strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             def currentTime = new Date().time // msec
             wrapTimes << (currentTime - previousTime)
             previousTime = currentTime
@@ -119,7 +118,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
     void testWithLockAndRetry_exception_unexpected() {
         // Exercise & Verify
         try {
-            strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+            PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
                 throw new IOException("EXCEPTION_FOR_TEST")
             }
             assert false
@@ -141,7 +140,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         assert testDomain.version == 0
 
         // Exercise & Verify
-        strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             assert lockedTestDomain.version == 1
             assert lockedTestDomain.value == "123456789"
             lockedTestDomain.value = "1234567890"
@@ -159,7 +158,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         }
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
         }
 
@@ -173,7 +172,7 @@ class StrictDomainUpdaterTests extends GroovyTestCase {
         def testDomains = []
 
         // Exercise
-        def result = strictDomainUpdater.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             testDomains << lockedTestDomain
 
             // 1回目で削除する。2回目で対象ドメインが見つからなくなることを期待している。

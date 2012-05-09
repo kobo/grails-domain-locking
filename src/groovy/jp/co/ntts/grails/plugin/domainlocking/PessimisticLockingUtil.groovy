@@ -11,12 +11,13 @@ import org.apache.commons.logging.LogFactory
  * 競合時に先行するセッションの情報を強制的に上書きするため使いどころに注意が必要です。
  * 競合発生時の対処を自律的に判断できないWebAPI向けに利用することを想定しています。
  */
-class StrictDomainUpdater {
+class PessimisticLockingUtil {
 
-    private Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(PessimisticLockingUtil.getClass())
 
-    int retryCount = 1
-    int interval = 0
+    // TODO properties化
+    static int retryCount = 1
+    static int interval = 0
 
     /**
      * ドメインオブジェクトの更新処理を確実に実行します。
@@ -30,7 +31,7 @@ class StrictDomainUpdater {
      * @param closure 実行したいドメインオブジェクト操作を含むクロージャ。クロージャ引数にロック取得に成功したドメインオブジェクトが渡されます。
      * @return クロージャ処理が正常に実行できた場合、クロージャの戻り値をそのまま返します。
      */
-    def withLockAndRetry(Class lockingDomainClass, long lockingDomainId, Closure closure) {
+    static withLockAndRetry(Class lockingDomainClass, long lockingDomainId, Closure closure) {
         for (num in 1..retryCount) {
             boolean succeed = false
             try {

@@ -11,9 +11,9 @@ import org.apache.commons.logging.LogFactory
  * 競合時に先行するセッションの情報を誤って強制的に上書きすることを防げます。
  * ユーザに競合発生を通知して自律的な判断を促せるGUI向けに利用することを想定しています。
  */
-class OptimisticDomainUpdater {
+class OptimisticLockingUtil {
 
-    private Log log = LogFactory.getLog(this.getClass())
+    private static final Log log = LogFactory.getLog(this.getClass())
 
     /**
      * ドメインオブジェクトの更新処理を実行します。
