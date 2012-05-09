@@ -1,4 +1,5 @@
 import jp.co.ntts.grails.plugin.domainlocking.OptimisticLockingUtil
+import jp.co.ntts.grails.plugin.domainlocking.PessimisticLockingUtil
 
 class DomainLockingGrailsPlugin {
     // the plugin version
@@ -55,6 +56,12 @@ Brief summary/description of the plugin.
              }
              domainClass.metaClass.tryUpdate = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
                  OptimisticLockingUtil.tryUpdate(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
+             }
+
+             // PessimisticLockingUtil
+             // TODO to extract the enhancement into an individual class
+             domainClass.metaClass.static.withLockAndRetry = { long lockingDomainId, Closure closure ->
+                 PessimisticLockingUtil.withLockAndRetry(delegate, lockingDomainId, closure)
              }
          }
     }
