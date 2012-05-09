@@ -130,9 +130,9 @@ class OptimisticLockingUtilSpec extends Specification {
                 null |  null
     }
 
-    def "withFailuretHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
+    def "withFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = OptimisticLockingUtil.withFailuretHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.withFailureHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert domain == testDomain

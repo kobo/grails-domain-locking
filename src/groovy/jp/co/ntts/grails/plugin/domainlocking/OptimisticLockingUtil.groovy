@@ -27,7 +27,7 @@ class OptimisticLockingUtil {
      * @return クロージャ処理が正常に実行できた場合、クロージャの戻り値をそのまま返します。
      *         失敗ハンドラが実行された場合は、失敗ハンドラの戻り値をそのまま返します。
      */
-    static withFailuretHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
+    static withFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
         tryUpdate(domain, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
     }
 
