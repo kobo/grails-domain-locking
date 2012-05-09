@@ -27,7 +27,7 @@ class OptimisticLockingUtil {
      * @return クロージャ処理が正常に実行できた場合、クロージャの戻り値をそのまま返します。
      *         失敗ハンドラが実行された場合は、失敗ハンドラの戻り値をそのまま返します。
      */
-    def withFailuretHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
+    static withFailuretHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
         tryUpdate(domain, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
     }
 
@@ -42,7 +42,7 @@ class OptimisticLockingUtil {
      * @return クロージャ処理が正常に実行できた場合、クロージャの戻り値をそのまま返します。
      *         失敗ハンドラが実行された場合は、失敗ハンドラの戻り値をそのまま返します。
      */
-    def withDefaultFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure) {
+    static withDefaultFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure) {
         tryUpdate(domain, persistentVersion, modificationBaseVersion, updateClosure, setOptimisticLockingFailureToRejectValue)
     }
 
@@ -58,7 +58,7 @@ class OptimisticLockingUtil {
      * @return クロージャ処理が正常に実行できた場合、クロージャの戻り値をそのまま返します。
      *         失敗ハンドラが実行された場合は、失敗ハンドラの戻り値をそのまま返します。
      */
-    def withExtraFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler) {
+    static withExtraFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler) {
         tryUpdate(domain, persistentVersion, modificationBaseVersion, updateClosure, { failedDomain ->
                 setOptimisticLockingFailureToRejectValue.call(failedDomain)
                 extraFailureHandler.call(failedDomain)
@@ -70,7 +70,7 @@ class OptimisticLockingUtil {
      * デフォルトの失敗ハンドラとして利用されます。
      * @return 戻り値は必ずnull
      */
-    def setOptimisticLockingFailureToRejectValue = { domain ->
+    static setOptimisticLockingFailureToRejectValue = { domain ->
         def domainClassName = domain.getClass().simpleName
         domain.errors.rejectValue("version", "default.optimistic.locking.failure",
                 [domainClassName] as Object[],
@@ -78,7 +78,7 @@ class OptimisticLockingUtil {
         return null
     }
 
-    private tryUpdate(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
+    private static tryUpdate(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler) {
         Long persistentVersionAsLong = convertToLong(persistentVersion)
         Long modificationBaseVersionAsLong = convertToLong(modificationBaseVersion)
         if (persistentVersionAsLong != null && modificationBaseVersion != null) {
@@ -99,7 +99,7 @@ class OptimisticLockingUtil {
         }
     }
 
-    private Long convertToLong(number) {
+    private static Long convertToLong(number) {
         switch (number) {
             case Number:
                 return number as Long

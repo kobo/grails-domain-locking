@@ -5,23 +5,18 @@ import spock.lang.*
 import org.springframework.dao.OptimisticLockingFailureException
 import test.*
 
-class OptimisticLockingUtilSpec extends UnitSpec {
+@Mock(TestDomain)
+class OptimisticLockingUtilSpec extends Specification {
 
-    def optimisticLockingUtil
     def testDomain
 
     def setup() {
-        optimisticLockingUtil = new OptimisticLockingUtil()
-
-        // 何でも構わないが今回はTestDomainを使う。
-        mockDomain(TestDomain)
         testDomain = new TestDomain()
-        testDomain.version = 0
     }
 
     def "tryUpdate: version比較: persistentVersionとmodificationBaseVersionが等しい場合、更新処理が実行される"() {
         when:
-        def result = optimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert false
@@ -40,7 +35,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "tryUpdate: version比較: persistentVersionがmodificationBaseVersionよりも古い場合、更新処理が実行される"() {
         when:
-        def result = optimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert false
@@ -60,7 +55,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "tryUpdate: version比較: persistentVersionがmodificationBaseVersionよりも新しい場合、競合したと見なし、失敗ハンドラが実行される"() {
         when:
-        def result = optimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
             assert false : "このクロージャは実行されない"
             return "OK"
         }, { domain ->
@@ -82,7 +77,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "tryUpdate: OptimisticLockingFailureExceptionが発生した場合、競合したと見なし、失敗ハンドラが実行される"() {
         when:
-        def result = optimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, { ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }, { domain ->
             assert domain == testDomain
@@ -103,7 +98,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "setOptimisticLockingFailureToRejectValue: デフォルトの失敗ハンドラではrejectValueが実行される"() {
         when:
-        def result = optimisticLockingUtil.setOptimisticLockingFailureToRejectValue(testDomain)
+        def result = OptimisticLockingUtil.setOptimisticLockingFailureToRejectValue(testDomain)
 
         then:
         result == null
@@ -115,7 +110,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "convertToLong: longに変換する"() {
         when:
-        def result = optimisticLockingUtil.convertToLong(from)
+        def result = OptimisticLockingUtil.convertToLong(from)
 
         then:
         if (result != null) {
@@ -137,7 +132,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "withFailuretHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = optimisticLockingUtil.withFailuretHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.withFailuretHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert domain == testDomain
@@ -156,7 +151,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "withDefaultFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = optimisticLockingUtil.withDefaultFailureHandler(testDomain, persistentVersion, modificationBaseVersion) { ->
+        def result = OptimisticLockingUtil.withDefaultFailureHandler(testDomain, persistentVersion, modificationBaseVersion) { ->
             return "OK"
         }
 
@@ -175,7 +170,7 @@ class OptimisticLockingUtilSpec extends UnitSpec {
 
     def "withExtraFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = optimisticLockingUtil.withExtraFailureHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
+        def result = OptimisticLockingUtil.withExtraFailureHandler(testDomain, persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert domain == testDomain

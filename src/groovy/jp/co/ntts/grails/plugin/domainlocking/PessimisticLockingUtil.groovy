@@ -15,7 +15,7 @@ class PessimisticLockingUtil {
 
     private static final Log log = LogFactory.getLog(PessimisticLockingUtil.getClass())
 
-    // TODO properties化
+    // TODO properties化してstaticで持つのをやめる
     static int retryCount = 1
     static int interval = 0
 
