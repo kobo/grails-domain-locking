@@ -43,12 +43,6 @@ Brief summary/description of the plugin.
     }
 
     def doWithSpring = {
-        pessimisticLockingUtil(jp.co.ntts.grails.plugin.domainlocking.PessimisticLockingUtil) {
-            retryCount = 5  // times
-            interval = 1000 // sec
-        }
-
-        optimisticLockingUtil(jp.co.ntts.grails.plugin.domainlocking.OptimisticLockingUtil)
     }
 
     def doWithDynamicMethods = { ctx ->
