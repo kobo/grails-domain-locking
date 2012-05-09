@@ -5,7 +5,7 @@ import spock.lang.*
 import org.springframework.dao.OptimisticLockingFailureException
 import test.*
 
-class OptimisticLockingMethodsSpec extends IntegrationSpec {
+class OptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
     def testDomain
 
@@ -105,28 +105,6 @@ class OptimisticLockingMethodsSpec extends IntegrationSpec {
         def errors = testDomain.errors.getFieldErrors("version")
         errors.size() == 1
         errors[0].codes.toList().contains("default.optimistic.locking.failure")
-    }
-
-    def "convertToLong: longに変換する"() {
-        when:
-        def result = OptimisticLockingUtil.convertToLong(from)
-
-        then:
-        if (result != null) {
-            assert result instanceof Long
-        }
-        result == to
-
-        where:
-                from |    to
-                   1 |    1L
-                  1L |    1L
-                  1G |    1L
-                 "1" |    1L
-               "123" |  123L
-        "NOT NUMBER" |  null
-                  "" |  null
-                null |  null
     }
 
     def "saveWithFailuretHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
