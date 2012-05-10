@@ -88,6 +88,9 @@ class OptimisticLockingUtil {
             }
         }
         try {
+            // FIXME クロージャ内でトランザクションが閉じていない場合は、
+            // トランザクションまたはセッションがクローズするときに例外が発生する可能性がある。
+            // もちろんその例外はここでは補足できない。
             return updateClosure.call()
 
         } catch (DataIntegrityViolationException e) {
