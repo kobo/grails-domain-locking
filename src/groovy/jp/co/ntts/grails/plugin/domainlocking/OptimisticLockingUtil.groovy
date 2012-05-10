@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory
  */
 class OptimisticLockingUtil {
 
-    private static final Log log = LogFactory.getLog(this.getClass())
+    private static final Log LOG = LogFactory.getLog(OptimisticLockingUtil)
 
     /**
      * ドメインオブジェクトの更新処理を実行します。
@@ -83,7 +83,7 @@ class OptimisticLockingUtil {
         Long modificationBaseVersionAsLong = convertToLong(modificationBaseVersion)
         if (persistentVersionAsLong != null && modificationBaseVersion != null) {
             if (persistentVersionAsLong > modificationBaseVersionAsLong) {
-                log.debug "他のセッションによってバージョンが更新されています。: persistentVersion=${persistentVersionAsLong}, modificationBaseVersion=${modificationBaseVersionAsLong}"
+                LOG.debug "他のセッションによってバージョンが更新されています。: persistentVersion=${persistentVersionAsLong}, modificationBaseVersion=${modificationBaseVersionAsLong}"
                 return failureHandler(domain)
             }
         }
@@ -91,10 +91,10 @@ class OptimisticLockingUtil {
             return updateClosure.call()
 
         } catch (DataIntegrityViolationException e) {
-            log.warn "制約違反が発生しました。: ${e.message}"
+            LOG.warn "制約違反が発生しました。: ${e.message}"
             return failureHandler(domain)
         } catch (OptimisticLockingFailureException e) {
-            log.warn "楽観的ロックで競合が発生しました。: ${e.message}"
+            LOG.warn "楽観的ロックで競合が発生しました。: ${e.message}"
             return failureHandler(domain)
         }
     }

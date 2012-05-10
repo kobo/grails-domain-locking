@@ -13,7 +13,7 @@ import org.apache.commons.logging.LogFactory
  */
 class PessimisticLockingUtil {
 
-    private static final Log log = LogFactory.getLog(PessimisticLockingUtil.getClass())
+    private static final Log LOG = LogFactory.getLog(PessimisticLockingUtil)
 
     // TODO properties化してstaticで持つのをやめる
     static int retryCount = 1
@@ -47,7 +47,7 @@ class PessimisticLockingUtil {
                         notFoundDomainRecord = true
                         return // withTransactionを抜ける
                     }
-                    log.debug "悲観的ロックを獲得しました。: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}, version=${lockedDomain.version}"
+                    LOG.debug "悲観的ロックを獲得しました。: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}, version=${lockedDomain.version}"
 
                     // クロージャを実行する。
                     // 悲観的ロックの獲得に成功したドメインオブジェクトをクロージャ引数として渡す。
@@ -56,27 +56,27 @@ class PessimisticLockingUtil {
 
                 // 対象が存在しない場合にはリトライせずにここで終了する。
                 if (notFoundDomainRecord) {
-                    log.debug "対象ドメインレコードが存在しません。: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}"
+                    LOG.debug "対象ドメインレコードが存在しません。: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}"
                     return null
                 }
 
                 // 対象が存在して例外も発生しない場合は正常終了する。
-                log.debug "ロック＆リトライによる処理が成功しました。: ${num}回目/全${retryCount}回"
+                LOG.debug "ロック＆リトライによる処理が成功しました。: ${num}回目/全${retryCount}回"
                 return result
 
             } catch (UndeclaredThrowableException e) {
                 // クロージャ処理で例外が発生していた場合は、呼出元にそのままスローする。
-                log.debug "ロック＆リトライによる処理で例外が発生しました。: ${num}回目/全${retryCount}回, causedMessage=${e.cause?.message}"
+                LOG.debug "ロック＆リトライによる処理で例外が発生しました。: ${num}回目/全${retryCount}回, causedMessage=${e.cause?.message}"
                 throw e.cause
 
             } catch (OptimisticLockingFailureException e) {
-                log.debug "楽観的ロックで競合が発生しました。: ${e.message}"
+                LOG.debug "楽観的ロックで競合が発生しました。: ${e.message}"
             }
 
             // 指定の秒数だけ待機する。
             Thread.sleep interval
         }
-        log.debug "ロック＆リトライによる全ての処理が失敗しました。: 全${retryCount}回"
+        LOG.debug "ロック＆リトライによる全ての処理が失敗しました。: 全${retryCount}回"
         return null
     }
 }
