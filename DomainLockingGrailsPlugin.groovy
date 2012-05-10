@@ -46,13 +46,13 @@ Brief summary/description of the plugin.
          for (domainClass in application.domainClasses) {
              // OptimisticLockingUtil
              // TODO to extract the enhancement into an individual class
-             domainClass.metaClass.saveWithDefaultFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure ->
+             domainClass.metaClass.withDefaultFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure ->
                  OptimisticLockingUtil.withDefaultFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure)
              }
-             domainClass.metaClass.saveWithFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
+             domainClass.metaClass.withFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
                  OptimisticLockingUtil.withFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
              }
-             domainClass.metaClass.saveWithExtraFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler ->
+             domainClass.metaClass.withExtraFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler ->
                  OptimisticLockingUtil.withExtraFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, extraFailureHandler)
              }
              domainClass.metaClass.tryUpdate = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->

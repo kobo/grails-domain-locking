@@ -107,9 +107,9 @@ class OptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
         errors[0].codes.toList().contains("default.optimistic.locking.failure")
     }
 
-    def "saveWithFailuretHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
+    def "withFailuretHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.saveWithFailureHandler(persistentVersion, modificationBaseVersion, { ->
+        def result = testDomain.withFailureHandler(persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert domain == testDomain
@@ -126,9 +126,9 @@ class OptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
                         1 |                       0 | "NG"
     }
 
-    def "saveWithDefaultFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
+    def "withDefaultFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.saveWithDefaultFailureHandler(persistentVersion, modificationBaseVersion) { ->
+        def result = testDomain.withDefaultFailureHandler(persistentVersion, modificationBaseVersion) { ->
             return "OK"
         }
 
@@ -145,9 +145,9 @@ class OptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
                         1 |                       0 | null // デフォルト失敗ハンドラはnullを返す
     }
 
-    def "saveWithExtraFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
+    def "withExtraFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.saveWithExtraFailureHandler(persistentVersion, modificationBaseVersion, { ->
+        def result = testDomain.withExtraFailureHandler(persistentVersion, modificationBaseVersion, { ->
             return "OK"
         }, { domain ->
             assert domain == testDomain

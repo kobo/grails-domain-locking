@@ -20,7 +20,7 @@ class ${className}Controller {
             break
         case 'POST':
             def ${propertyName} = new ${className}(params)
-            ${propertyName}.saveWithExtraFailureHandler(${propertyName}.version, params.version, {
+            ${propertyName}.withExtraFailureHandler(${propertyName}.version, params.version, {
                 ${className}.withTransaction { status ->
                     if (${propertyName}.save(flush: true)) {
                         flash.message = message(code: 'default.created.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), ${propertyName}.id])
@@ -68,7 +68,7 @@ class ${className}Controller {
                 return
             }
 
-            ${propertyName}.saveWithExtraFailureHandler(${propertyName}.version, params.version, {
+            ${propertyName}.withExtraFailureHandler(${propertyName}.version, params.version, {
                 ${className}.withTransaction { status ->
                     ${propertyName}.properties = params
                     if (${propertyName}.save(flush: true)) {
