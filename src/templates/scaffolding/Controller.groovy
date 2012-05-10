@@ -94,14 +94,20 @@ class ${className}Controller {
             return
         }
 
-        try {
-            ${propertyName}.delete(flush: true)
-            flash.message = message(code: 'default.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])
-            redirect action: 'list'
-        }
-        catch (DataIntegrityViolationException e) {
-            flash.message = message(code: 'default.not.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])
+        ${propertyName}.withExtraFailureHandler(${propertyName}.version, params.version, {
+            ${className}.withTransaction {
+                try {
+                    ${propertyName}.delete(flush: true)
+                    flash.message = message(code: 'default.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])
+                    redirect action: 'list'
+                }
+                catch (org.springframework.dao.DataIntegrityViolationException e) {
+                    flash.message = message(code: 'default.not.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])
+                    redirect action: 'show', id: params.id
+                }
+            }
+        }, { domain ->
             redirect action: 'show', id: params.id
-        }
+        })
     }
 }
