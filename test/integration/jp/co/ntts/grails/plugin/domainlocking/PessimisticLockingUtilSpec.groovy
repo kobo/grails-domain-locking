@@ -1,11 +1,9 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-import grails.plugin.spock.*
-import spock.lang.*
+import grails.plugin.spock.IntegrationSpec
 import org.springframework.dao.OptimisticLockingFailureException
-import test.*
+import test.TestDomain
 
-//class PessimisticLockingUtilSpec extends Specification { // TODO how to rollback a transaction
 class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     def testDomain

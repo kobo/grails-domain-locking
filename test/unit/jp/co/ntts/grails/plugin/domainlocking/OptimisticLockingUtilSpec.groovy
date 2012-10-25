@@ -1,12 +1,10 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-import grails.plugin.spock.*
-import spock.lang.*
+import grails.plugin.spock.UnitSpec
 import org.springframework.dao.OptimisticLockingFailureException
-import test.*
+import test.TestDomain
 
-@Mock(TestDomain)
-class OptimisticLockingUtilSpec extends Specification {
+class OptimisticLockingUtilSpec extends UnitSpec {
 
     def testDomain
 
