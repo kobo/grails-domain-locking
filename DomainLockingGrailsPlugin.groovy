@@ -1,3 +1,5 @@
+import jp.co.ntts.grails.plugin.domainlocking.OldOptimisticLockingUtil
+import jp.co.ntts.grails.plugin.domainlocking.OldPessimisticLockingUtil
 import jp.co.ntts.grails.plugin.domainlocking.OptimisticLockingUtil
 import jp.co.ntts.grails.plugin.domainlocking.PessimisticLockingUtil
 
@@ -45,28 +47,33 @@ Brief summary/description of the plugin.
     // Online location of the plugin's browseable source code.
 //    def scm = [ url: "http://svn.grails-plugins.codehaus.org/browse/grails-plugins/" ]
 
-     def doWithDynamicMethods = { applicationContext ->
-         for (domainClass in application.domainClasses) {
-             // OptimisticLockingUtil
-             // TODO to extract the enhancement into an individual class
-             domainClass.metaClass.withDefaultFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure ->
-                 OptimisticLockingUtil.withDefaultFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure)
-             }
-             domainClass.metaClass.withFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
-                 OptimisticLockingUtil.withFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
-             }
-             domainClass.metaClass.withExtraFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler ->
-                 OptimisticLockingUtil.withExtraFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, extraFailureHandler)
-             }
-             domainClass.metaClass.tryUpdate = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
-                 OptimisticLockingUtil.tryUpdate(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
-             }
+    def doWithDynamicMethods = { applicationContext ->
+        for (domainClass in application.domainClasses) {
+            // OldOptimisticLockingUtil (Deprecated)
+            domainClass.metaClass.withDefaultFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure ->
+                OldOptimisticLockingUtil.withDefaultFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure)
+            }
+            domainClass.metaClass.withFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure failureHandler ->
+                OldOptimisticLockingUtil.withFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, failureHandler)
+            }
+            domainClass.metaClass.withExtraFailureHandler = { persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler ->
+                OldOptimisticLockingUtil.withExtraFailureHandler(delegate, persistentVersion, modificationBaseVersion, updateClosure, extraFailureHandler)
+            }
 
-             // PessimisticLockingUtil
-             // TODO to extract the enhancement into an individual class
-             domainClass.metaClass.static.withLockAndRetry = { long lockingDomainId, Closure closure ->
-                 PessimisticLockingUtil.withLockAndRetry(delegate, lockingDomainId, closure)
-             }
-         }
+            // PessimisticLockingUtil (Deprecated)
+            domainClass.metaClass.static.withLockAndRetry = { long lockingDomainId, Closure closure ->
+                OldPessimisticLockingUtil.withLockAndRetry(delegate, lockingDomainId, closure)
+            }
+
+            // OptimisticLockingUtil
+            domainClass.metaClass.withOptimisticLock = { Closure dslClosure ->
+                OptimisticLockingUtil.withOptimisticLock(delegate, dslClosure)
+            }
+
+            // PessimisticLockingUtil
+            domainClass.metaClass.static.withPessimisticLock = { long lockingDomainId, Closure closure ->
+                PessimisticLockingUtil.withPessimisticLock(delegate, lockingDomainId, closure)
+            }
+        }
     }
 }
