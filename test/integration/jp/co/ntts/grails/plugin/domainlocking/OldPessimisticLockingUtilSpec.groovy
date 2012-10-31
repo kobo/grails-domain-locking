@@ -4,7 +4,7 @@ import grails.plugin.spock.IntegrationSpec
 import org.springframework.dao.OptimisticLockingFailureException
 import test.TestDomain
 
-class PessimisticLockingUtilSpec extends IntegrationSpec {
+class OldPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def testDomain
     def handledTestDomains = []
@@ -17,13 +17,13 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
         testDomain = newSavedTestDomain(1)
 
         // テストしやすいようにデフォルト値から変更しておく
-        PessimisticLockingUtil.retryCount = 3
-        PessimisticLockingUtil.interval = 0
+        OldPessimisticLockingUtil.retryCount = 3
+        OldPessimisticLockingUtil.interval = 0
     }
 
     def "withLockAndRetry: variation of retryCount and returnValue"() {
         when:
-        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             handledTestDomains << lockedTestDomain
             if (handledTestDomains.size() <= failingTimes) {
                 throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
@@ -45,12 +45,12 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withLockAndRetry: interval can be changed"() {
         setup:
-        PessimisticLockingUtil.interval = 1000 // msec
+        OldPessimisticLockingUtil.interval = 1000 // msec
         def previousTime = new Date().time // msec
         def wrapTimes = []
 
         when:
-        PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             def currentTime = new Date().time // msec
             wrapTimes << (currentTime - previousTime)
             previousTime = currentTime
@@ -68,7 +68,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withLockAndRetry: when unexpected exception occures"() {
         when:
-        PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }
 
@@ -89,7 +89,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
         assert testDomain.version == 0
 
         expect:
-        PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             // 別セッションでの更新もきちんと反映した上でクロージャが実行される。
             assert lockedTestDomain.version == 1
             assert lockedTestDomain.value == "123456789"
@@ -107,7 +107,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
         }
 
         when:
-        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             // 対象が存在しない場合はクロージャ自体が実行されない
             assert false
         }
@@ -118,7 +118,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withLockAndRetry: target is not found when deleted at first invocation of closure"() {
         when:
-        def result = PessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
+        def result = OldPessimisticLockingUtil.withLockAndRetry(TestDomain, testDomain.id) { lockedTestDomain ->
             handledTestDomains << lockedTestDomain
 
             // 1回目で削除する。2回目で対象ドメインが見つからなくなることを期待している。

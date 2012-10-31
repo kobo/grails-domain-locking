@@ -1,9 +1,9 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-import org.springframework.dao.OptimisticLockingFailureException
-import org.springframework.dao.DataIntegrityViolationException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.dao.OptimisticLockingFailureException
 
 /**
  * ドメイン操作の競合時の処理を統一的に処理するためのヘルパクラスです。
@@ -11,9 +11,10 @@ import org.apache.commons.logging.LogFactory
  * 競合時に先行するセッションの情報を誤って強制的に上書きすることを防げます。
  * ユーザに競合発生を通知して自律的な判断を促せるGUI向けに利用することを想定しています。
  */
-class OptimisticLockingUtil {
+@Deprecated
+class OldOptimisticLockingUtil {
 
-    private static final Log LOG = LogFactory.getLog(OptimisticLockingUtil)
+    private static final Log LOG = LogFactory.getLog(OldOptimisticLockingUtil)
 
     /**
      * ドメインオブジェクトの更新処理を実行します。
@@ -60,8 +61,8 @@ class OptimisticLockingUtil {
      */
     static withExtraFailureHandler(domain, persistentVersion, modificationBaseVersion, Closure updateClosure, Closure extraFailureHandler) {
         tryUpdate(domain, persistentVersion, modificationBaseVersion, updateClosure, { failedDomain ->
-                setOptimisticLockingFailureToRejectValue.call(failedDomain)
-                extraFailureHandler.call(failedDomain)
+            setOptimisticLockingFailureToRejectValue.call(failedDomain)
+            extraFailureHandler.call(failedDomain)
         })
     }
 
@@ -73,8 +74,8 @@ class OptimisticLockingUtil {
     static setOptimisticLockingFailureToRejectValue = { domain ->
         def domainClassName = domain.getClass().simpleName
         domain.errors.rejectValue("version", "default.optimistic.locking.failure",
-                [domainClassName] as Object[],
-                "Another user has updated this ${domainClassName} while you were editing")
+                                  [domainClassName] as Object[],
+                                  "Another user has updated this ${domainClassName} while you were editing")
         return null
     }
 
@@ -88,9 +89,9 @@ class OptimisticLockingUtil {
             }
         }
         try {
-            // FIXME クロージャ内でトランザクションが閉じていない場合は、
-            // トランザクションまたはセッションがクローズするときに例外が発生する可能性がある。
+            // TODO クロージャ内でトランザクションが閉じていない場合は、トランザクションまたはセッションがクローズするときに例外が発生する可能性がある。
             // もちろんその例外はここでは補足できない。
+
             return updateClosure.call()
 
         } catch (DataIntegrityViolationException e) {

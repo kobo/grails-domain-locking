@@ -4,7 +4,7 @@ import grails.plugin.spock.IntegrationSpec
 import org.springframework.dao.OptimisticLockingFailureException
 import test.TestDomain
 
-class PessimisticLockingDynamicMethodsSpec extends IntegrationSpec {
+class OldPessimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
     def testDomain
     def handledTestDomains = []
@@ -17,8 +17,8 @@ class PessimisticLockingDynamicMethodsSpec extends IntegrationSpec {
         testDomain = newSavedTestDomain(1)
 
         // テストしやすいようにデフォルト値から変更しておく
-        PessimisticLockingUtil.retryCount = 3
-        PessimisticLockingUtil.interval = 0
+        OldPessimisticLockingUtil.retryCount = 3
+        OldPessimisticLockingUtil.interval = 0
     }
 
     def "withLockAndRetry: variation of retryCount and returnValue"() {
@@ -45,7 +45,7 @@ class PessimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
     def "withLockAndRetry: interval can be changed"() {
         setup:
-        PessimisticLockingUtil.interval = 1000 // msec
+        OldPessimisticLockingUtil.interval = 1000 // msec
         def previousTime = new Date().time // msec
         def wrapTimes = []
 

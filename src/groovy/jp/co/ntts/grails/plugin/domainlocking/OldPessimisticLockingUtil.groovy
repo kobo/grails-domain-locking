@@ -11,9 +11,10 @@ import org.apache.commons.logging.LogFactory
  * 競合時に先行するセッションの情報を強制的に上書きするため使いどころに注意が必要です。
  * 競合発生時の対処を自律的に判断できないWebAPI向けに利用することを想定しています。
  */
-class PessimisticLockingUtil {
+@Deprecated
+class OldPessimisticLockingUtil {
 
-    private static final Log LOG = LogFactory.getLog(PessimisticLockingUtil)
+    private static final Log LOG = LogFactory.getLog(OldPessimisticLockingUtil)
 
     // TODO properties化してstaticで持つのをやめる
     static int retryCount = 1
