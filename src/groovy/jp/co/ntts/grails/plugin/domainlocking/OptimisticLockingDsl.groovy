@@ -31,11 +31,11 @@ class OptimisticLockingDsl {
         }
     }
 
-    static parse(Closure dsl) {
-        def parser = new OptimisticLockingDsl()
-        dsl.delegate = parser
-        dsl.call()
-        parser.verify()
-        return parser
+    static parse(Closure dslClosure) {
+        def dsl = new OptimisticLockingDsl()
+        dslClosure.delegate = dsl
+        dslClosure.call()
+        dsl.verify()
+        return dsl
     }
 }
