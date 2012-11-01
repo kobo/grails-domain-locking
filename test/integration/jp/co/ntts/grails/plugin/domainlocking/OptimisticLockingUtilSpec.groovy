@@ -20,6 +20,10 @@ class OptimisticLockingUtilSpec extends IntegrationSpec {
         assert testDomain.version == 1
     }
 
+    def cleanup() {
+        TestDomain.list()*.delete(flush: true)
+    }
+
     @Unroll
     def "withOptimisticLock: calls or not onFailure handler when persistentVersion( #persistentVersion ) #operator modificationBaseVersion( #modificationBaseVersion )"() {
         given:
