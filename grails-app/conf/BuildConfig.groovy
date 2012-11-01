@@ -21,7 +21,6 @@ grails.project.dependency.resolution = {
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
     }
-
     plugins {
         build(
             ":tomcat:$grailsVersion",
@@ -32,6 +31,9 @@ grails.project.dependency.resolution = {
         test(
             ":hibernate:$grailsVersion",
             ":spock:0.6",
+            ":codenarc:0.17",
+            ":code-coverage:1.2.5",
+            ":gmetrics:0.3.1",
         ) {
             export = false
         }
