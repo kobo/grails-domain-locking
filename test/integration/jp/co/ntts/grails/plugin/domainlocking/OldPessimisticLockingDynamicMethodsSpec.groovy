@@ -15,14 +15,11 @@ class OldPessimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
     def setup() {
         testDomain = newSavedTestDomain(1)
+        assert TestDomain.count() == 1
 
         // テストしやすいようにデフォルト値から変更しておく
         OldPessimisticLockingUtil.retryCount = 3
         OldPessimisticLockingUtil.interval = 0
-    }
-
-    def cleanup() {
-        TestDomain.list()*.delete(flush: true)
     }
 
     def "withLockAndRetry: variation of retryCount and returnValue"() {

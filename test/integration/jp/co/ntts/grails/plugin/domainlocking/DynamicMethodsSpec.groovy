@@ -10,10 +10,7 @@ class DynamicMethodsSpec extends IntegrationSpec {
     def setup() {
         // saving TestDomain
         testDomain = new TestDomain(value: "TEST_VALUE").save(failOnError: true, flush: true)
-    }
-
-    def cleanup() {
-        TestDomain.list()*.delete(flush: true)
+        assert TestDomain.count() == 1
     }
 
     def "withOptimisticLock: delegates to OptimisticLockingUtil.withOptimisticLock()"() {

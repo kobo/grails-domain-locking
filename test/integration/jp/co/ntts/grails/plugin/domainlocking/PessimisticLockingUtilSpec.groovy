@@ -4,6 +4,7 @@ import grails.plugin.spock.IntegrationSpec
 import test.TestDomain
 
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
 
 class PessimisticLockingUtilSpec extends IntegrationSpec {
 
@@ -13,12 +14,10 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     def setup() {
         TestDomain.withNewTransaction {
+            TestDomain.list()*.delete(flush: true)
             testDomain = new TestDomain(value: "TEST_VALUE").save(flush: true, failOnError: true)
         }
-    }
-
-    def cleanup() {
-        TestDomain.list()*.delete(flush: true)
+        assert TestDomain.count() == 1
     }
 
     def "withPessimisticLock: calls main closure when acquires a lock"() {
@@ -112,6 +111,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
         given:
         def history = [] as CopyOnWriteArrayList // 複数スレッドから更新するため
         def thread = null // スレッドの待ち受け用
+        def latch = new CountDownLatch(1)
 
         when:
         TestDomain.withNewTransaction {
@@ -123,6 +123,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
                 TestDomain.withNewSession { session ->
                     TestDomain.withNewTransaction {
                         history << "anotherThread:waiting"
+                        latch.countDown()
                         PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) {
                             main { testDomainInAnotherThread ->
                                 history << "anotherThread:locked"
@@ -138,7 +139,8 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
             }
 
             // 別スレッドがロック取得処理まで確実に進んでからupdateする。
-            sleep 500
+            latch.await()
+            sleep 100
             testDomainInCurrentThread.value = "UPDATED_VALUE_BY_CURRENT_SESSION"
             testDomainInCurrentThread.save(failOnError: true, flush: true)
             history << "currentThread:updated"

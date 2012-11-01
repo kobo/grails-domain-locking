@@ -13,9 +13,9 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
     def "withFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.withFailureHandler(persistentVersion, modificationBaseVersion, { ->
+        def result = testDomain.withFailureHandler(persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }, { domain ->
+        }                                          , { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -25,14 +25,14 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
         where:
         persistentVersion | modificationBaseVersion | expected
-                        0 |                       0 | "OK"
-                        0 |                       1 | "OK"
-                        1 |                       0 | "NG"
+        0                 | 0                       | "OK"
+        0                 | 1                       | "OK"
+        1                 | 0                       | "NG"
     }
 
     def "withDefaultFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.withDefaultFailureHandler(persistentVersion, modificationBaseVersion) { ->
+        def result = testDomain.withDefaultFailureHandler(persistentVersion, modificationBaseVersion) {->
             return "OK"
         }
 
@@ -44,16 +44,16 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
         where:
         persistentVersion | modificationBaseVersion | expected
-                        0 |                       0 | "OK"
-                        0 |                       1 | "OK"
-                        1 |                       0 | null // デフォルト失敗ハンドラはnullを返す
+        0                 | 0                       | "OK"
+        0                 | 1                       | "OK"
+        1                 | 0                       | null // デフォルト失敗ハンドラはnullを返す
     }
 
     def "withExtraFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {
         when:
-        def result = testDomain.withExtraFailureHandler(persistentVersion, modificationBaseVersion, { ->
+        def result = testDomain.withExtraFailureHandler(persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }, { domain ->
+        }                                               , { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -67,8 +67,8 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
 
         where:
         persistentVersion | modificationBaseVersion | expected
-                        0 |                       0 | "OK"
-                        0 |                       1 | "OK"
-                        1 |                       0 | "NG"
+        0                 | 0                       | "OK"
+        0                 | 1                       | "OK"
+        1                 | 0                       | "NG"
     }
 }
