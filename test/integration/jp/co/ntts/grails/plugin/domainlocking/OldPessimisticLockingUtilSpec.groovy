@@ -10,7 +10,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
     def handledTestDomains = []
 
     private newSavedTestDomain(id) {
-        new TestDomain(value: "TEST_DOMAIN_${id}").save(flush:true, failOnError:true)
+        new TestDomain(value: "TEST_DOMAIN_${id}").save(flush: true, failOnError: true)
     }
 
     def setup() {
@@ -19,6 +19,10 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
         // テストしやすいようにデフォルト値から変更しておく
         OldPessimisticLockingUtil.retryCount = 3
         OldPessimisticLockingUtil.interval = 0
+    }
+
+    def cleanup() {
+        TestDomain.list()*.delete(flush: true)
     }
 
     def "withLockAndRetry: variation of retryCount and returnValue"() {
@@ -37,10 +41,10 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
 
         where:
         failingTimes | handledDomainCount | expectedResult
-                   0 |                  1 | "OK"
-                   1 |                  2 | "OK"
-                   2 |                  3 | "OK"
-                   3 |                  3 | null
+        0            | 1                  | "OK"
+        1            | 2                  | "OK"
+        2            | 3                  | "OK"
+        3            | 3                  | null
     }
 
     def "withLockAndRetry: interval can be changed"() {
@@ -63,7 +67,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
         // 2回目以降は1つ前の実行からinterval間隔以上経っていること。
         // ただし、intervalよりも長すぎてもNG(とはいえ、サーバ性能によって成功したり
         // 失敗したりするのは良くないため、かなり余裕を持たせた)。
-        wrapTimes[1..2].every{ (1000 <= it) && (it < 5000) }
+        wrapTimes[1..2].every { (1000 <= it) && (it < 5000) }
     }
 
     def "withLockAndRetry: when unexpected exception occures"() {
@@ -82,7 +86,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
         TestDomain.withNewSession {
             def workTestDomain = TestDomain.get(testDomain.id)
             workTestDomain.value = "123456789"
-            workTestDomain.save(flush:true)
+            workTestDomain.save(flush: true)
             assert workTestDomain.version == 1
         }
         // メインセッションでのtestDomainはまだ更新されてない。
@@ -94,7 +98,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
             assert lockedTestDomain.version == 1
             assert lockedTestDomain.value == "123456789"
             lockedTestDomain.value = "1234567890"
-            lockedTestDomain.save(flush:true)
+            lockedTestDomain.save(flush: true)
         }
     }
 
@@ -102,7 +106,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
         setup:
         TestDomain.withNewSession {
             // 別セッションでtestDomainを削除しておく。
-            TestDomain.get(testDomain.id).delete(flush:true)
+            TestDomain.get(testDomain.id).delete(flush: true)
             assert TestDomain.count() == 0
         }
 
@@ -125,7 +129,7 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
             // 別のスレッドによってリトライ途中で対象が削除された、という想定。
             TestDomain.withNewSession {
                 // 別セッションでtestDomainを削除しておく。
-                TestDomain.get(testDomain.id).delete(flush:true)
+                TestDomain.get(testDomain.id).delete(flush: true)
                 assert TestDomain.count() == 0
             }
 
