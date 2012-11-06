@@ -6,4 +6,8 @@ class TestDomain {
 
     static constraints = {
     }
+
+    String toString() {
+        "TestDomain($id, $version, $value)"
+    }
 }

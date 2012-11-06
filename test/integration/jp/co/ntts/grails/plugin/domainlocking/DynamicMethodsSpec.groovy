@@ -8,8 +8,10 @@ class DynamicMethodsSpec extends IntegrationSpec {
     def testDomain
 
     def setup() {
+        assert TestDomain.list() == []
+
         // saving TestDomain
-        testDomain = new TestDomain(value: "TEST_VALUE").save(failOnError: true, flush: true)
+        testDomain = new TestDomain(value: "DynamicMethodsSpec's TEST_VALUE").save(failOnError: true, flush: true)
         assert TestDomain.count() == 1
     }
 

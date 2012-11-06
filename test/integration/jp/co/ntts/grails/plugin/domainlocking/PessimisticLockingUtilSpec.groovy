@@ -9,15 +9,22 @@ import java.util.concurrent.CountDownLatch
 class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     private static final long NOT_FOUND_ID = 9999
+    private static final String TEST_VALUE = "PessimisticLockingUtilSpec's TEST_VALUE"
 
     def testDomain
 
     def setup() {
         TestDomain.withNewTransaction {
             TestDomain.list()*.delete(flush: true)
-            testDomain = new TestDomain(value: "TEST_VALUE").save(flush: true, failOnError: true)
+            testDomain = new TestDomain(value: "PessimisticLockingUtilSpec's TEST_VALUE").save(flush: true, failOnError: true)
+            println "withNewTransaction: " + testDomain.id
         }
         assert TestDomain.count() == 1
+    }
+
+    def cleanupSpec() {
+        // workaround to delete the record on another independent transaction, to prevent affecting other tests.
+        TestDomain.list()*.delete(flush: true)
     }
 
     def "withPessimisticLock: calls main closure when acquires a lock"() {
@@ -116,7 +123,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
         when:
         TestDomain.withNewTransaction {
             def testDomainInCurrentThread = TestDomain.lock(testDomain.id)
-            assert testDomainInCurrentThread.value == "TEST_VALUE"
+            assert testDomainInCurrentThread.value == TEST_VALUE
             history << "currentThread:locked"
 
             thread = Thread.start {->
@@ -173,7 +180,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
         and: "still orignal value in current session"
         assert testDomain.version == 0
-        assert testDomain.value == "TEST_VALUE"
+        assert testDomain.value == TEST_VALUE
 
         when:
         PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) {
@@ -191,7 +198,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
         and:
         assert testDomain.version == 0
-        assert testDomain.value == "TEST_VALUE"
+        assert testDomain.value == TEST_VALUE
 
         when:
         TestDomain.withSession { it.clear() }
@@ -211,7 +218,7 @@ class PessimisticLockingUtilSpec extends IntegrationSpec {
 
         and: "still there in current session"
         assert testDomain.version == 0
-        assert testDomain.value == "TEST_VALUE"
+        assert testDomain.value == TEST_VALUE
 
         when:
         def result = PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) {

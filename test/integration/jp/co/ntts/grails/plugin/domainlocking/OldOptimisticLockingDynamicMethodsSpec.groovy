@@ -8,7 +8,7 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
     def testDomain
 
     def setup() {
-        testDomain = new TestDomain()
+        testDomain = new TestDomain() // necessary to be saved
     }
 
     def "withFailureHandler: 内部のtryUpdateに正しくディスパッチできているかどうか"() {

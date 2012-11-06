@@ -9,13 +9,13 @@ class OldPessimisticLockingUtilSpec extends IntegrationSpec {
     def testDomain
     def handledTestDomains = []
 
-    def sessionFactory
-
     private newSavedTestDomain(id) {
-        new TestDomain(value: "TEST_DOMAIN_${id}").save(flush: true, failOnError: true)
+        new TestDomain(value: "OldPessimisticLockingUtilSpec's TEST_DOMAIN_${id}").save(flush: true, failOnError: true)
     }
 
     def setup() {
+        assert TestDomain.list() == []
+
         testDomain = newSavedTestDomain(1)
         assert TestDomain.count() == 1
 

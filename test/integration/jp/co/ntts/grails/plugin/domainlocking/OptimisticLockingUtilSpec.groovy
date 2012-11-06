@@ -11,12 +11,14 @@ class OptimisticLockingUtilSpec extends IntegrationSpec {
     def testDomain
 
     def setup() {
+        assert TestDomain.list() == []
+
         // saving TestDomain
-        testDomain = new TestDomain(value: "INIT_VALUE").save(failOnError: true, flush: true)
+        testDomain = new TestDomain(value: "OptimisticLockingUtilSpec's INIT_VALUE").save(failOnError: true, flush: true)
         assert TestDomain.count() == 1
 
         // updating version
-        testDomain.value = "TEST_VALUE"
+        testDomain.value = "OptimisticLockingUtilSpec's TEST_VALUE"
         testDomain.save(failOnError: true, flush: true)
         assert testDomain.version == 1
     }
