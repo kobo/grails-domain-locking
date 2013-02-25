@@ -1,7 +1,5 @@
 // configuration for plugin testing - will not be included in the plugin zip
 
-grails.project.groupId = "jp.co.ntts.grails.plugin.domainlocking"
-
 log4j = {
     appenders {
         console name:'stdout', layout:pattern(conversionPattern: '(%c{2}) %m%n')
@@ -27,5 +25,3 @@ log4j = {
 
     debug  'jp.co.ntts.grails.plugin.domainlocking'
 }
-grails.views.default.codec="none" // none, html, base64
-grails.views.gsp.encoding="UTF-8"
