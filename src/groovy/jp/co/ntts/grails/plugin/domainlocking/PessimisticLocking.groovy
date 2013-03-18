@@ -20,10 +20,10 @@ class PessimisticLocking {
         def lockedDomain = lockingDomainClass.lock(lockingDomainId)
         if (lockedDomain == null) {
             log.debug "Target not found: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}"
-            return new PessimisticLockingResult(
+            return new Result(
                 returnValue: null,
                 onNotFound: { Closure onNotFoundClosure ->
-                    return new PessimisticLockingResult(returnValue: onNotFoundClosure.call(lockingDomainId))
+                    return new Result(returnValue: onNotFoundClosure.call(lockingDomainId))
                 }
             )
         }
@@ -34,8 +34,13 @@ class PessimisticLocking {
 
         return [
             returnValue: returnValue,
-            onNotFound: { Closure onNotFoundClosure -> new PessimisticLockingResult(returnValue: returnValue) }
+            onNotFound: { Closure onNotFoundClosure -> new Result(returnValue: returnValue) }
         ]
+    }
+
+    static class Result {
+        def returnValue
+        Closure onNotFound
     }
 }
 

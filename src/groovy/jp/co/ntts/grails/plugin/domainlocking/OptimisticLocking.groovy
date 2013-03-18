@@ -18,7 +18,7 @@ class OptimisticLocking {
         return executeMain(domain, mainClosure)
     }
 
-    private static OptimisticLockingResult executeMain(Object domain, Closure mainClosure) {
+    private static Result executeMain(Object domain, Closure mainClosure) {
         try {
             def returnValue = mainClosure.call(domain)
 
@@ -27,9 +27,9 @@ class OptimisticLocking {
             // Instead, it would occur, for example, after an invocation of an action of a controller.
             domain.withSession { it.flush() }
 
-            return new OptimisticLockingResult(
+            return new Result(
                 returnValue: returnValue,
-                onFailure: { Closure userFailureHandler -> new OptimisticLockingResult(returnValue: returnValue) }
+                onFailure: { Closure userFailureHandler -> new Result(returnValue: returnValue) }
             )
 
         } catch (DataIntegrityViolationException e) {
@@ -56,7 +56,7 @@ class OptimisticLocking {
 
     private static handleFailure(domain) {
         bindFieldError(domain)
-        return new OptimisticLockingResult(
+        return new Result(
             returnValue: null,
             onFailure: { Closure userFailureHandler = null ->
                 if (userFailureHandler) {
@@ -73,6 +73,11 @@ class OptimisticLocking {
             [domainClassName] as Object[],
             "Another user has updated this ${domainClassName} while you were editing")
         return null
+    }
+
+    static class Result {
+        def returnValue
+        Closure onFailure
     }
 }
 
