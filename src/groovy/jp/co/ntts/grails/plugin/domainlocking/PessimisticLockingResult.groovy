@@ -1,6 +1,6 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-class PessimisticDomainLockingResult {
+class PessimisticLockingResult {
     def returnValue
     Closure onNotFound
 }

@@ -1,6 +1,6 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-class OptimisticDomainLockingResult {
+class OptimisticLockingResult {
     def returnValue
     Closure onFailure
 }
