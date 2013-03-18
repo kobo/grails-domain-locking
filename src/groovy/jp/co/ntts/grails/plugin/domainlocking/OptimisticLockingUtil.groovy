@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Commons
-class NewOptimisticLockingUtil {
+class OptimisticLockingUtil {
 
     static withOptimisticLock(domain, modificationBaseVersion = null, Closure mainClosure) {
         shouldNotNull(domain: domain, mainClosure: mainClosure)

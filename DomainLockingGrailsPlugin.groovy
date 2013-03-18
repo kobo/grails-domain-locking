@@ -25,13 +25,13 @@ class DomainLockingGrailsPlugin {
     def doWithDynamicMethods = { applicationContext ->
         for (domainClass in application.domainClasses) {
             // OptimisticLockingUtil
-            domainClass.metaClass.withOptimisticLock = { Closure dslClosure ->
-                OptimisticLockingUtil.withOptimisticLock(delegate, dslClosure)
+            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion, Closure mainClosure ->
+                OptimisticLockingUtil.withOptimisticLock(delegate, modificationBaseVersion, mainClosure)
             }
 
             // PessimisticLockingUtil
-            domainClass.metaClass.static.withPessimisticLock = { long lockingDomainId, Closure dslClosure ->
-                PessimisticLockingUtil.withPessimisticLock(delegate, lockingDomainId, dslClosure)
+            domainClass.metaClass.static.withPessimisticLock = { Long lockingDomainId, Closure mainClosure ->
+                PessimisticLockingUtil.withPessimisticLock(delegate, lockingDomainId, mainClosure)
             }
         }
     }

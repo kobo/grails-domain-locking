@@ -6,7 +6,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
 import test.TestDomain
 
-class NewOptimisticLockingUtilSpec extends IntegrationSpec {
+class OptimisticLockingUtilSpec extends IntegrationSpec {
 
     def testDomain
 
@@ -29,7 +29,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
         testDomain.version = persistentVersion
 
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain, modificationBaseVersion) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain, modificationBaseVersion) { domain ->
             assert executedMain
             assert domain.id == testDomain.id
             return "OK"
@@ -66,7 +66,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: executes main clause and returns its return value when versionCompare isn't specified"() {
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
             return "OK"
         }.onFailure { domain ->
             assert false
@@ -78,7 +78,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: executes main clause and returns its return value when onFailure isn't specified and the locking is succeed"() {
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain, 1) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain, 1) { domain ->
             return "OK"
         }
 
@@ -88,7 +88,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: returns null when onFailure isn't specified and the locking is failed"() {
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain, 0) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain, 0) { domain ->
             assert false
         }
 
@@ -102,7 +102,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
     @Unroll
     def "withOptimisticLock: calls onFailure handler when #exception.class.name was thrown"() {
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
             throw exception
         }.onFailure { domain ->
             assert domain.id == testDomain.id
@@ -125,7 +125,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: returns null when called without onFailure handler"() {
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -141,7 +141,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
         testDomain.save(failOnError: true, flush: true)
 
         when:
-        def result = NewOptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
+        def result = OptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
             // to make DataIntegrityViolationException occur by flushing
             testDomain.value = null
             testDomain.save(validate: false)
@@ -155,7 +155,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception occurs in main closure"() {
         when:
-        NewOptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
+        OptimisticLockingUtil.withOptimisticLock(testDomain) { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }.onFailure { domain ->
             assert false
@@ -168,7 +168,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception occurs in onFailure closure"() {
         when:
-        NewOptimisticLockingUtil.withOptimisticLock(testDomain, 0) { domain ->
+        OptimisticLockingUtil.withOptimisticLock(testDomain, 0) { domain ->
             assert false
         }.onFailure { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
@@ -181,7 +181,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws IllegalArgumentException when called with no domain argument"() {
         when:
-        NewOptimisticLockingUtil.withOptimisticLock(null, { /.../ })
+        OptimisticLockingUtil.withOptimisticLock(null, { /.../ })
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -190,7 +190,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws IllegalArgumentException when called with no mainClosure argument"() {
         when:
-        NewOptimisticLockingUtil.withOptimisticLock(testDomain, null)
+        OptimisticLockingUtil.withOptimisticLock(testDomain, null)
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -199,7 +199,7 @@ class NewOptimisticLockingUtilSpec extends IntegrationSpec {
 
     def "convertToLong: converts to long or null from any types"() {
         when:
-        def result = NewOptimisticLockingUtil.convertToLong(from)
+        def result = OptimisticLockingUtil.convertToLong(from)
 
         then:
         result == to

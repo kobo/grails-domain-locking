@@ -3,7 +3,7 @@ package jp.co.ntts.grails.plugin.domainlocking
 import groovy.util.logging.Commons
 
 @Commons
-class NewPessimisticLockingUtil {
+class PessimisticLockingUtil {
 
     static withPessimisticLock(Class lockingDomainClass, Long lockingDomainId, Closure mainClosure) {
         shouldNotNull(lockingDomainClass: lockingDomainClass, lockingDomainId: lockingDomainId, mainClosure: mainClosure)

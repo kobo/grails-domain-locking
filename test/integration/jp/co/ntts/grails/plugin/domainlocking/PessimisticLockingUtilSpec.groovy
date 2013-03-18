@@ -6,7 +6,7 @@ import test.TestDomain
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
 
-class NewPessimisticLockingUtilSpec extends IntegrationSpec {
+class PessimisticLockingUtilSpec extends IntegrationSpec {
 
     private static final long NOT_FOUND_ID = 9999
     private static final String TEST_VALUE = "PessimisticLockingUtilSpec's TEST_VALUE"
@@ -29,7 +29,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: calls main closure when acquires a lock"() {
         when:
-        def result = NewPessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
+        def result = PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
             assert lockedDomain.id == testDomain.id
             return "OK"
         }.onNotFound { id ->
@@ -42,7 +42,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: calls onNotFound closure when target is not found"() {
         when:
-        def result = NewPessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
+        def result = PessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
             assert false
         }.onNotFound { id ->
             return "NOT_FOUND: $id"
@@ -54,7 +54,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: calls default onNotFound closure when calling without onNotFound closure"() {
         when:
-        def result = NewPessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
+        def result = PessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
             assert false
         }
 
@@ -64,7 +64,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: throws the original exception when an exception occurs in main closure"() {
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
+        PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }.onNotFound { id ->
             assert false
@@ -77,7 +77,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: throws the original exception when an exception occurs in onNotFound closure"() {
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
+        PessimisticLockingUtil.withPessimisticLock(TestDomain, NOT_FOUND_ID) { lockedDomain ->
             assert false
         }.onNotFound { id ->
             throw new IOException("EXCEPTION_FOR_TEST")
@@ -105,7 +105,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
                     TestDomain.withNewTransaction {
                         history << "anotherThread:waiting"
                         latch.countDown()
-                        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { testDomainInAnotherThread ->
+                        PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { testDomainInAnotherThread ->
                             history << "anotherThread:locked"
                             testDomainInAnotherThread.value = "UPDATED_VALUE_BY_ANOTHER_SESSION_OF_ANOTHER_THREAD"
                             testDomainInAnotherThread.save(failOnError: true, flush: true)
@@ -155,7 +155,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
         assert testDomain.value == TEST_VALUE
 
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
+        PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
             assert lockedDomain.version == 1
             assert lockedDomain.value == "UPDATED_BY_ANOTHER_SESSION"
 
@@ -191,7 +191,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
         assert testDomain.value == TEST_VALUE
 
         when:
-        def result = NewPessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
+        def result = PessimisticLockingUtil.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
             assert false
         }.onNotFound { id ->
             assert id == testDomain.id
@@ -207,7 +207,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: throws IllegalArgumentException when called with no lockingDomainClass argument"() {
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(null, 1, { /.../ })
+        PessimisticLockingUtil.withPessimisticLock(null, 1, { /.../ })
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -216,7 +216,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: throws IllegalArgumentException when called with no lockingDomainId argument"() {
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, null, { /.../ })
+        PessimisticLockingUtil.withPessimisticLock(TestDomain, null, { /.../ })
 
         then:
         def e = thrown(IllegalArgumentException)
@@ -225,7 +225,7 @@ class NewPessimisticLockingUtilSpec extends IntegrationSpec {
 
     def "withPessimisticLock: throws IllegalArgumentException when called with no dslClosure argument"() {
         when:
-        NewPessimisticLockingUtil.withPessimisticLock(TestDomain, 1, null)
+        PessimisticLockingUtil.withPessimisticLock(TestDomain, 1, null)
 
         then:
         def e = thrown(IllegalArgumentException)
