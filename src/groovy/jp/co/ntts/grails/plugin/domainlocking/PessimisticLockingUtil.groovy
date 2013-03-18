@@ -6,7 +6,7 @@ import groovy.util.logging.Commons
 class PessimisticLockingUtil {
 
     static withPessimisticLock(Class lockingDomainClass, Long lockingDomainId, Closure mainClosure) {
-        shouldNotNull(lockingDomainClass: lockingDomainClass, lockingDomainId: lockingDomainId, mainClosure: mainClosure)
+        Util.shouldNotNull(lockingDomainClass: lockingDomainClass, lockingDomainId: lockingDomainId, mainClosure: mainClosure)
 
         // 1次キャッシュとDBの状態に差分がある場合(他のセッションによる変更・削除後など)、
         // OptimisticLockingFailureExceptionが発生してしまう。これを防止するために、
@@ -36,12 +36,6 @@ class PessimisticLockingUtil {
             returnValue: returnValue,
             onNotFound: { Closure onNotFoundClosure -> new PessimisticDomainLockingResult(returnValue: returnValue) }
         ]
-    }
-
-    private static shouldNotNull(argMaps) {
-        argMaps.each { name, value ->
-            if (value == null) throw new IllegalArgumentException("${name} should not be null.")
-        }
     }
 }
 

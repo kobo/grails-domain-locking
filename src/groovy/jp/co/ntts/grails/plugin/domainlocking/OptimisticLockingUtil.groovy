@@ -8,7 +8,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 class OptimisticLockingUtil {
 
     static withOptimisticLock(domain, modificationBaseVersion = null, Closure mainClosure) {
-        shouldNotNull(domain: domain, mainClosure: mainClosure)
+        Util.shouldNotNull(domain: domain, mainClosure: mainClosure)
 
         if (isDifferentVersion(domain.version, modificationBaseVersion)) {
             log.debug "Version is already updated by other session: domainClass=${domain.class.name}, id=${domain.id}, persistentVersion=${domain.version}, modificationBaseVersion=${modificationBaseVersion}"
@@ -44,8 +44,8 @@ class OptimisticLockingUtil {
     private static boolean isDifferentVersion(persistentVersion, modificationBaseVersion) {
         if (modificationBaseVersion == null) return false
 
-        Long persistentVersionAsLong = convertToLong(persistentVersion)
-        Long modificationBaseVersionAsLong = convertToLong(modificationBaseVersion)
+        Long persistentVersionAsLong = Util.convertToLong(persistentVersion)
+        Long modificationBaseVersionAsLong = Util.convertToLong(modificationBaseVersion)
         if (persistentVersionAsLong != null && modificationBaseVersion != null) {
             if (persistentVersionAsLong > modificationBaseVersionAsLong) {
                 return true
@@ -73,20 +73,6 @@ class OptimisticLockingUtil {
             [domainClassName] as Object[],
             "Another user has updated this ${domainClassName} while you were editing")
         return null
-    }
-
-    private static Long convertToLong(number) {
-        switch (number) {
-            case Number: return number as Long
-            case String: return number.isLong() ? number.toLong() : null
-            default: return null
-        }
-    }
-
-    private static shouldNotNull(argMaps) {
-        argMaps.each { name, value ->
-            if (value == null) throw new IllegalArgumentException("${name} should not be null.")
-        }
     }
 }
 

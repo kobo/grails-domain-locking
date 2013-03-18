@@ -197,32 +197,6 @@ class OptimisticLockingUtilSpec extends IntegrationSpec {
         e.message == "mainClosure should not be null."
     }
 
-    def "convertToLong: converts to long or null from any types"() {
-        when:
-        def result = OptimisticLockingUtil.convertToLong(from)
-
-        then:
-        result == to
-
-        and:
-        if (result != null) {
-            assert result instanceof Long
-        }
-
-        where:
-        from         | to
-        1            | 1L
-        1F           | 1L
-        1L           | 1L
-        1G           | 1L
-        "1"          | 1L
-        "123"        | 123L
-        "NOT NUMBER" | null
-        ""           | null
-        null         | null
-        new Object() | null
-    }
-
     private static void assertVersionConflict(domain) {
         assert domain.hasErrors()
         def errors = domain.errors.getFieldErrors("version")
