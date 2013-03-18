@@ -19,27 +19,26 @@ class PessimisticLocking {
         def lockedDomain = lockingDomainClass.lock(lockingDomainId)
         if (lockedDomain == null) {
             log.debug "Target not found: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}"
-            return new Result(
-                returnValue: null,
-                onNotFound: { Closure onNotFoundClosure ->
-                    return new Result(returnValue: onNotFoundClosure.call(lockingDomainId))
-                }
-            )
+            return new Result(returnValue: null, domainId: lockingDomainId, succeed: false)
         }
         log.debug "Acquired pessimistic lock: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}, version=${lockedDomain.version}"
 
         // execute main closure
         def returnValue = mainClosure.call(lockedDomain)
-
-        return [
-            returnValue: returnValue,
-            onNotFound: { Closure onNotFoundClosure -> new Result(returnValue: returnValue) }
-        ]
+        return new Result(returnValue: returnValue, domainId: lockingDomainId, succeed: true)
     }
 
     static class Result {
         def returnValue
-        Closure onNotFound
+        Long domainId
+        boolean succeed
+
+        Result onNotFound(Closure failureHandler) {
+            if (failureHandler && !succeed) {
+                return [returnValue: failureHandler(domainId)]
+            }
+            return [returnValue: returnValue]
+        }
     }
 }
 
