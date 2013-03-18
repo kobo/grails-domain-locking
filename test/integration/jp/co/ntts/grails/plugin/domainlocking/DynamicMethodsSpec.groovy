@@ -17,33 +17,26 @@ class DynamicMethodsSpec extends IntegrationSpec {
 
     def "withOptimisticLock: delegates to OptimisticLockingUtil.withOptimisticLock()"() {
         when:
-        def result = testDomain.withOptimisticLock {
-            baseVersion 0
-            main {
-                return "OK"
-            }
-            onFailure { domain ->
-                assert false
-            }
+        def result = testDomain.withOptimisticLock(0) { domain ->
+            return "OK"
+        }.onFailure { domain ->
+            assert false
         }
 
         then:
-        result == "OK"
+        result.returnValue == "OK"
     }
 
     def "withPessimisticLock: delegates to PessimisticLockingUtil.withPessimisticLock()"() {
         when:
-        def result = TestDomain.withPessimisticLock(testDomain.id) {
-            main { lockedDomain ->
-                return "OK"
-            }
-            onNotFound { id ->
-                assert false
-            }
+        def result = TestDomain.withPessimisticLock(testDomain.id) { lockedDomain ->
+            return "OK"
+        }.onNotFound { id ->
+            assert false
         }
 
         then:
-        result == "OK"
+        result.returnValue == "OK"
     }
 
 }
