@@ -15,7 +15,7 @@ class DynamicMethodsSpec extends IntegrationSpec {
         assert TestDomain.count() == 1
     }
 
-    def "withOptimisticLock: delegates to OptimisticLockingUtil.withOptimisticLock()"() {
+    def "withOptimisticLock: delegates to OptimisticLocking.withOptimisticLock()"() {
         when:
         def result = testDomain.withOptimisticLock(0) { domain ->
             return "OK"
@@ -27,7 +27,7 @@ class DynamicMethodsSpec extends IntegrationSpec {
         result.returnValue == "OK"
     }
 
-    def "withPessimisticLock: delegates to PessimisticLockingUtil.withPessimisticLock()"() {
+    def "withPessimisticLock: delegates to PessimisticLocking.withPessimisticLock()"() {
         when:
         def result = TestDomain.withPessimisticLock(testDomain.id) { lockedDomain ->
             return "OK"

@@ -1,5 +1,5 @@
-import jp.co.ntts.grails.plugin.domainlocking.OptimisticLockingUtil
-import jp.co.ntts.grails.plugin.domainlocking.PessimisticLockingUtil
+import jp.co.ntts.grails.plugin.domainlocking.OptimisticLocking
+import jp.co.ntts.grails.plugin.domainlocking.PessimisticLocking
 
 class DomainLockingGrailsPlugin {
 
@@ -24,14 +24,12 @@ class DomainLockingGrailsPlugin {
 
     def doWithDynamicMethods = { applicationContext ->
         for (domainClass in application.domainClasses) {
-            // OptimisticLockingUtil
             domainClass.metaClass.withOptimisticLock = { modificationBaseVersion, Closure mainClosure ->
-                OptimisticLockingUtil.withOptimisticLock(delegate, modificationBaseVersion, mainClosure)
+                OptimisticLocking.withOptimisticLock(delegate, modificationBaseVersion, mainClosure)
             }
 
-            // PessimisticLockingUtil
             domainClass.metaClass.static.withPessimisticLock = { Long lockingDomainId, Closure mainClosure ->
-                PessimisticLockingUtil.withPessimisticLock(delegate, lockingDomainId, mainClosure)
+                PessimisticLocking.withPessimisticLock(delegate, lockingDomainId, mainClosure)
             }
         }
     }
