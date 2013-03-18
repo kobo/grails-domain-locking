@@ -16,7 +16,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         when:
         def result = OldOptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                               , { domain ->
+        }, { domain ->
             assert false
         })
 
@@ -35,7 +35,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         when:
         def result = OldOptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                               , { domain ->
+        }, { domain ->
             assert false
         })
 
@@ -56,7 +56,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         def result = OldOptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, {->
             assert false: "このクロージャは実行されない"
             return "OK"
-        }                                               , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -77,7 +77,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         when:
         def result = OldOptimisticLockingUtil.tryUpdate(testDomain, persistentVersion, modificationBaseVersion, {->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
-        }                                               , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -132,7 +132,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         when:
         def result = OldOptimisticLockingUtil.withFailureHandler(testDomain, persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                                        , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -170,7 +170,7 @@ class OldOptimisticLockingUtilSpec extends UnitSpec {
         when:
         def result = OldOptimisticLockingUtil.withExtraFailureHandler(testDomain, persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                                             , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })

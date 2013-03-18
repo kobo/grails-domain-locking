@@ -15,7 +15,7 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
         when:
         def result = testDomain.withFailureHandler(persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                          , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })
@@ -53,7 +53,7 @@ class OldOptimisticLockingDynamicMethodsSpec extends IntegrationSpec {
         when:
         def result = testDomain.withExtraFailureHandler(persistentVersion, modificationBaseVersion, {->
             return "OK"
-        }                                               , { domain ->
+        }, { domain ->
             assert domain == testDomain
             return "NG"
         })

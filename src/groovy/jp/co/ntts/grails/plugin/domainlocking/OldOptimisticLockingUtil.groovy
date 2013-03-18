@@ -74,8 +74,8 @@ class OldOptimisticLockingUtil {
     static setOptimisticLockingFailureToRejectValue = { domain ->
         def domainClassName = domain.getClass().simpleName
         domain.errors.rejectValue("version", "default.optimistic.locking.failure",
-                                  [domainClassName] as Object[],
-                                  "Another user has updated this ${domainClassName} while you were editing")
+            [domainClassName] as Object[],
+            "Another user has updated this ${domainClassName} while you were editing")
         return null
     }
 

@@ -1,8 +1,8 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
+import groovy.util.logging.Commons
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
-import groovy.util.logging.Commons
 
 /**
  * ドメイン操作の楽観的ロック競合時の処理を統一的に処理します。
@@ -81,8 +81,8 @@ class OptimisticLockingUtil {
     private static void bindFieldError(domain) {
         def domainClassName = domain.getClass().simpleName
         domain.errors.rejectValue("version", "default.optimistic.locking.failure",
-                                  [domainClassName] as Object[],
-                                  "Another user has updated this ${domainClassName} while you were editing")
+            [domainClassName] as Object[],
+            "Another user has updated this ${domainClassName} while you were editing")
     }
 
     private static Long convertToLong(number) {

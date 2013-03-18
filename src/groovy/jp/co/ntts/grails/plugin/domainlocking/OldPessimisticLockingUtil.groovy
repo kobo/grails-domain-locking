@@ -1,9 +1,10 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
-import org.springframework.dao.OptimisticLockingFailureException
-import java.lang.reflect.UndeclaredThrowableException
 import org.apache.commons.logging.Log
 import org.apache.commons.logging.LogFactory
+import org.springframework.dao.OptimisticLockingFailureException
+
+import java.lang.reflect.UndeclaredThrowableException
 
 /**
  * ドメイン操作の競合を回避して確実に更新するためのヘルパクラスです。
@@ -42,7 +43,7 @@ class OldPessimisticLockingUtil {
                     // 悲観的ロックを取得する。
                     // これがないとデッドロックが発生する場合があるため、現状では必要。
                     // これまでのセッションキャッシュをクリアして、ロックを獲得したときに確実に最新の情報がとれるようにする。
-                    lockingDomainClass.withSession{ it.clear() }
+                    lockingDomainClass.withSession { it.clear() }
                     def lockedDomain = lockingDomainClass.lock(lockingDomainId)
                     if (!lockedDomain) {
                         notFoundDomainRecord = true
