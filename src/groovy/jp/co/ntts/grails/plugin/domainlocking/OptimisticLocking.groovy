@@ -27,10 +27,8 @@ class OptimisticLocking {
             // Instead, it would occur, for example, after an invocation of an action of a controller.
             domain.withSession { it.flush() }
 
-            return new Result(
-                returnValue: returnValue,
-                onFailure: { Closure userFailureHandler -> new Result(returnValue: returnValue) }
-            )
+            return new Result(returnValue: returnValue, domain: domain, succeed: true)
+
 
         } catch (DataIntegrityViolationException e) {
             log.debug "Constraint violation occurred.", e
@@ -54,17 +52,9 @@ class OptimisticLocking {
         return false
     }
 
-    private static handleFailure(domain) {
+    private static Result handleFailure(domain) {
         bindFieldError(domain)
-        return new Result(
-            returnValue: null,
-            onFailure: { Closure userFailureHandler = null ->
-                if (userFailureHandler) {
-                    return [returnValue: userFailureHandler(domain)]
-                }
-                return [returnValue: null]
-            }
-        )
+        return new Result(returnValue: null, domain: domain, succeed: false)
     }
 
     private static bindFieldError(domain) {
@@ -77,7 +67,16 @@ class OptimisticLocking {
 
     static class Result {
         def returnValue
-        Closure onFailure
+        def domain
+        boolean succeed
+
+        Result onFailure(Closure failureHandler) {
+            if (failureHandler && !succeed) {
+                assert domain
+                return [returnValue: failureHandler(domain)]
+            }
+            return [returnValue: returnValue]
+        }
     }
 }
 
