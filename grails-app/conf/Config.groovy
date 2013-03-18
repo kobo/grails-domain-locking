@@ -1,9 +1,17 @@
 log4j = {
     error 'org.codehaus.groovy.grails',
-          'org.springframework',
-          'org.hibernate',
-          'net.sf.ehcache.hibernate'
+        'org.springframework',
+        'org.hibernate',
+        'net.sf.ehcache.hibernate'
+
+    environments {
+        test {
+            root {
+                debug "jp.co.ntts.grails.plugin.domainlocking.*"
+            }
+        }
+    }
 }
 
-grails.views.default.codec="none" // none, html, base64
-grails.views.gsp.encoding="UTF-8"
+grails.views.default.codec = "none" // none, html, base64
+grails.views.gsp.encoding = "UTF-8"
