@@ -10,37 +10,53 @@ class OptimisticLockingUtil {
     static withOptimisticLock(domain, modificationBaseVersion = null, Closure mainClosure) {
         shouldNotNull(domain: domain, mainClosure: mainClosure)
 
-        Long persistentVersionAsLong = domain.version
-        Long modificationBaseVersionAsLong = convertToLong(modificationBaseVersion)
-        if (persistentVersionAsLong != null && modificationBaseVersion != null) {
-            if (persistentVersionAsLong > modificationBaseVersionAsLong) {
-                log.debug "他のセッションによってバージョンが更新されています。: persistentVersion=${persistentVersionAsLong}, modificationBaseVersion=${modificationBaseVersionAsLong}"
-                return handleFailure(domain)
-            }
+        if (isDifferentVersion(domain.version, modificationBaseVersion)) {
+            log.debug "Version is already updated by other session: domainClass=${domain.class.name}, id=${domain.id}, persistentVersion=${domain.version}, modificationBaseVersion=${modificationBaseVersion}"
+            return handleFailure(domain)
         }
+
+        return executeMain(domain, mainClosure)
+    }
+
+    private static OptimisticDomainLockingResult executeMain(Object domain, Closure mainClosure) {
         try {
             def returnValue = mainClosure.call(domain)
 
-            // ここでセッションのフラッシュを強制しないと、実際のSQL発行がこのクロージャ外で行われることになりキャッチできなくなってしまう。
             // To flush session only when mainClosure is succeed.
             // If this were missed, runtime exception couldn't occur here.
             // Instead, it would occur, for example, after an invocation of an action of a controller.
             domain.withSession { it.flush() }
 
-            return [returnValue: returnValue, onFailure: { Closure userFailureHandler -> [returnValue: returnValue] }]
+            return new OptimisticDomainLockingResult(
+                returnValue: returnValue,
+                onFailure: { Closure userFailureHandler -> new OptimisticDomainLockingResult(returnValue: returnValue) }
+            )
 
         } catch (DataIntegrityViolationException e) {
-            log.warn "制約違反が発生しました。: ${e.message}"
+            log.debug "Constraint violation occurred.", e
             return handleFailure(domain)
         } catch (OptimisticLockingFailureException e) {
-            log.warn "楽観的ロックで競合が発生しました。: ${e.message}"
+            log.debug "Optimistic locking conflicted.", e
             return handleFailure(domain)
         }
     }
 
+    private static boolean isDifferentVersion(persistentVersion, modificationBaseVersion) {
+        if (modificationBaseVersion == null) return false
+
+        Long persistentVersionAsLong = convertToLong(persistentVersion)
+        Long modificationBaseVersionAsLong = convertToLong(modificationBaseVersion)
+        if (persistentVersionAsLong != null && modificationBaseVersion != null) {
+            if (persistentVersionAsLong > modificationBaseVersionAsLong) {
+                return true
+            }
+        }
+        return false
+    }
+
     private static handleFailure(domain) {
         bindFieldError(domain)
-        return [
+        return new OptimisticDomainLockingResult(
             returnValue: null,
             onFailure: { Closure userFailureHandler = null ->
                 if (userFailureHandler) {
@@ -48,7 +64,7 @@ class OptimisticLockingUtil {
                 }
                 return [returnValue: null]
             }
-        ]
+        )
     }
 
     private static bindFieldError(domain) {
@@ -61,13 +77,9 @@ class OptimisticLockingUtil {
 
     private static Long convertToLong(number) {
         switch (number) {
-            case Number:
-                return number as Long
-            case String:
-                return number.isLong() ? number.toLong() : null
-            case null:
-            default:
-                return null
+            case Number: return number as Long
+            case String: return number.isLong() ? number.toLong() : null
+            default: return null
         }
     }
 
