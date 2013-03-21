@@ -1,4 +1,11 @@
+.settings
 *.log
 *.zip
 plugin.xml
 target
+*.idea
+/improx-resources
+web-app
+/docs
+/build
+/.gradle
