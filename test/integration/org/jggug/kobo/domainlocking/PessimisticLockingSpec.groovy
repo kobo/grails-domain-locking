@@ -16,7 +16,6 @@ class PessimisticLockingSpec extends IntegrationSpec {
         TestDomain.withNewTransaction {
             TestDomain.list()*.delete(flush: true)
             testDomain = new TestDomain(value: "PessimisticLockingSpec's TEST_VALUE").save(flush: true, failOnError: true)
-            println "withNewTransaction: " + testDomain.id
         }
         assert TestDomain.count() == 1
     }
