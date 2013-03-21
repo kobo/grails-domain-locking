@@ -29,13 +29,12 @@ class OptimisticLocking {
 
             return new Result(returnValue: returnValue, domain: domain, succeed: true)
 
-
         } catch (DataIntegrityViolationException e) {
             log.debug "Constraint violation occurred.", e
-            return handleFailure(domain)
+            return handleFailure(domain, e)
         } catch (OptimisticLockingFailureException e) {
             log.debug "Optimistic locking conflicted.", e
-            return handleFailure(domain)
+            return handleFailure(domain, e)
         }
     }
 
@@ -52,30 +51,38 @@ class OptimisticLocking {
         return false
     }
 
-    private static Result handleFailure(domain) {
+    private static Result handleFailure(domain, Throwable caused = null) {
         bindFieldError(domain)
-        return new Result(returnValue: null, domain: domain, succeed: false)
+        return new Result(returnValue: null, domain: domain, succeed: false, caused: caused)
     }
 
     private static bindFieldError(domain) {
         def domainClassName = domain.getClass().simpleName
-        domain.errors.rejectValue("version", "default.optimistic.locking.failure",
-            [domainClassName] as Object[],
-            "Another user has updated this ${domainClassName} while you were editing")
-        return null
+        domain.errors.rejectValue("version", "default.optimistic.locking.failure", [domainClassName] as Object[], "Another user has updated this ${domainClassName} while you were editing")
     }
 
     static class Result {
         def returnValue
         def domain
         boolean succeed
+        Throwable caused
 
         Result onFailure(Closure failureHandler) {
-            if (failureHandler && !succeed) {
-                assert domain
-                return [returnValue: failureHandler(domain)]
+            return new Result(
+                returnValue: (succeed || !failureHandler) ? returnValue : evaluateReturnValue(failureHandler),
+                domain: domain,
+                succeed: succeed,
+                caused: caused
+            )
+        }
+
+        private evaluateReturnValue(Closure failureHandler) {
+            switch (failureHandler.parameterTypes.size()) {
+                case 0: return failureHandler()
+                case 1: return failureHandler(domain)
+                case 2: return failureHandler(domain, caused)
+                default: throw new IllegalArgumentException("failureHandler must be receive one or two arguments.")
             }
-            return [returnValue: returnValue]
         }
     }
 }

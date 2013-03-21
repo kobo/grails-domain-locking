@@ -104,9 +104,10 @@ class OptimisticLockingSpec extends IntegrationSpec {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw exception
-        }.onFailure { domain ->
+        }.onFailure { domain, caused ->
             assert domain.id == testDomain.id
             assert domain.version == testDomain.version
+            assert caused.is(exception)
             return "NG"
         }
 
@@ -145,7 +146,8 @@ class OptimisticLockingSpec extends IntegrationSpec {
             // to make DataIntegrityViolationException occur by flushing
             testDomain.value = null
             testDomain.save(validate: false)
-        }.onFailure { domain ->
+        }.onFailure { domain, caused ->
+            assert caused instanceof DataIntegrityViolationException
             return "NG"
         }
 
@@ -153,7 +155,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         result.returnValue == "NG"
     }
 
-    def "withOptimisticLock: throws the original exception when an exception occurs in main closure"() {
+    def "withOptimisticLock: throws the original exception when an exception excepting OptimisticLockingFailureException and DataIntegrityViolationException occurs in main closure"() {
         when:
         OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
@@ -195,6 +197,41 @@ class OptimisticLockingSpec extends IntegrationSpec {
         then:
         def e = thrown(IllegalArgumentException)
         e.message == "mainClosure should not be null."
+    }
+
+    def "withOptimisticLock: can have some following failureHandler Closure which receives 0-3 argument(s)"() {
+        given:
+        def exception = new DataIntegrityViolationException("EXCEPTION_FOR_TEST")
+        def history = []
+
+        when:
+        OptimisticLocking.withOptimisticLock(testDomain) { domain ->
+            history << "mainClosure"
+            throw exception
+        }.onFailure {->
+            history << "failureHandler of no args"
+        }.onFailure {
+            history << "failureHandler of 1 arg as implicit 'it'"
+            assert it.is(testDomain)
+        }.onFailure { domain ->
+            history << "failureHandler of 1 arg as explicit 'domain'"
+            assert domain.is(testDomain)
+        }.onFailure { domain, caused ->
+            history << "failureHandler of 2 args"
+            assert caused.is(exception)
+        }
+
+        then: "DataIntegrityViolationException isn't thrown to caller"
+        noExceptionThrown()
+
+        and: "all failureHandlers are executed"
+        history == [
+            "mainClosure",
+            "failureHandler of no args",
+            "failureHandler of 1 arg as implicit 'it'",
+            "failureHandler of 1 arg as explicit 'domain'",
+            "failureHandler of 2 args",
+        ]
     }
 
     private static void assertVersionConflict(domain) {
