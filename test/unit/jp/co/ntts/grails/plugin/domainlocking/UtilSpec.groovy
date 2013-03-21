@@ -1,7 +1,7 @@
 package jp.co.ntts.grails.plugin.domainlocking
-import grails.plugin.spock.IntegrationSpec
+import grails.plugin.spock.UnitSpec
 
-class UtilSpec extends IntegrationSpec {
+class UtilSpec extends UnitSpec {
 
     def "convertToLong: converts to long or null from any types"() {
         when:
