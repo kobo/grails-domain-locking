@@ -1,0 +1,6 @@
+h1. Domain Class Usage
+
+This plugin provides the following dynamic methods on domain class:
+
+* [withOptimisticLock|Domain Classes]
+* [withPessimisticLock|Domain Classes]

@@ -1,0 +1,90 @@
+In order to handle optimistic locking, use @withOptimisticLock@ method which is injected to domain class by the plugin.
+
+- @withOptimisticLock@ method compares a version of modification base with current version.
+-- @withOptimisticLocking@'s closure is invoked only when version of modification base < current persistent version is @true@.
+- When version of modification base < current persistent version is @false@ or @OptimisticLockingFailureException@ is catched,
+-- it invokes @onConflict@ closure.
+-- it sets error messages to the domain instance.
+- An exception except @OptimisticLockingFailureException@ is thrown untouched.
+
+{code}
+sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+
+    // operation which might causes @OptimisticLockingFailureException@.
+    // Here is invoked only when a version of modification base < current persistent version.
+
+}.onConflict { Object domain, Throwable caused ->
+
+    // operation to handle a failure of optimistic locking
+    // e.g. to render edit page for re-input
+}
+{code}
+
+
+h3. Type of modificationBaseVersion
+
+@modificationBaseVersion@ allows either @Number@ (@Long@, @Integer@, etc.) or @String@.
+So you can pass the value of @params@ in controller.
+
+
+h3. Skip a version comparation
+
+If a copmaration of version is unnecessary, you can ommit @modificationBaseVersion@ arguments as follows.
+In this case, the main closure will be always invoked.
+
+{code}
+sampleDomain.withOptimisticLocking { Object domain ->
+    // Here is always invoked regardless of the versions.
+}
+{code}
+
+
+h3. onConflict is optional
+
+If you don't have nothing to do for conflict, you can omit @onConflict@.
+
+{code}
+sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+    // ...
+}
+{code}
+
+In this case, when something fails, it just only set error message to domain class.
+
+
+h3. Closure arguments
+
+@domain@ equals to delegate object, namely @sampleDomain@. So you can use each one as you want.
+
+{code}
+sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+    assert domain.is(sampleDomain)
+}
+{code}
+
+arguments of @onConflict@'s closure are all optional. so you can omit them. The followings are all valid.
+
+{code}
+/* ... */.onConflict { Object domain, Throwable caused -> /* ... */ }
+/* ... */.onConflict { Object domain -> /* ... */ }
+/* ... */.onConflict { -> /* ... */ }
+{code}
+
+
+h3. Return value
+
+If you want a return value from closure, you can receive it via @returnValue@ property.
+
+{code}
+def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+    return "OK"
+}.onConflict { Object domain, Throwable caused ->
+    return "NG"
+}
+assert result.returnValue == "OK"
+{code}
+
+In case of conflict, a return value of @onConflict@'s closure is returned.
+{code}
+assert result.returnValue == "NG"
+{code}

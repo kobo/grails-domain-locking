@@ -26,7 +26,7 @@ class DomainLockingGrailsPlugin {
     def authorEmail = "ynak@jggug.org"
     def organization = [ name: "Japan Grails/Groovy User Group", url: "http://www.jggug.org/" ]
     def license = "APACHE"
-    def description = 'Provides a easy way to use optimistic/pessimistic locking.'
+    def description = 'Provides an easy way to use optimistic/pessimistic lock.'
     def documentation = "http://kobo.github.com/grails-domain-locking/"
     def scm = [url: "https://github.com/kobo/grails-domain-locking"]
     def issueManagement = [system: "GitHub Issues", url: "https://github.com/kobo/grails-domain-locking/issues"]

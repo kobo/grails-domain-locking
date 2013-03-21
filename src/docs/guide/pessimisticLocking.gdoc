@@ -1,0 +1,61 @@
+In order to operate a domain instance on multi-threads sequentially, Grails provides @lock@ method on domain class.
+I know its usage is very easy, but the plugin provides the wrapper wary @withPessimisticLock@ as contract @withOptimisticLock@.
+
+- @withPessimisticLock@ method invoke the closure with the locked domain instance specified by @id@.
+- If target row isn't found, @onNotFound@ closure is invoked.
+
+{code}
+SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+
+    // operation to require a pessimistic lock
+
+}.onNotFound { ->
+
+    // operation when the target is not found
+}
+{code}
+
+
+h3. onNotFound is optional
+
+If you don't have nothing to do on target not found, you can omit @onNotFound@.
+
+{code}
+SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+    // ...
+}
+{code}
+
+In this case, when target isn't found, all the plugin has to do is nothing.
+
+
+h3. Closure arguments
+
+The @lockedDomain@ argument of @onNotFound@'s closure is the domain instance which is found by @SampleDomain.lock(id)@ method.
+
+{code}
+SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+    assert lockedDomain.id == id
+}
+{code}
+
+There are no argument for @onNotFound@'s closure.
+
+
+h3. Return value
+
+If you want a return value from closure, you can receive it via @returnValue@ property.
+
+{code}
+def result = SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+    return "OK"
+}.onNotFound { ->
+    return "NG"
+}
+assert result.returnValue == "OK"
+{code}
+
+In case that no row is found, a return value of @onNotFound@'s closure is returned.
+{code}
+assert result.returnValue == "NG"
+{code}
