@@ -4,23 +4,18 @@ import org.jggug.kobo.domainlocking.PessimisticLocking
 class DomainLockingGrailsPlugin {
 
     def version = "0.2"
-    def grailsVersion = "2.1 > *"
-    def dependsOn = [:]
+    def grailsVersion = "2.0 > *"
     def pluginExcludes = [
-        "grails-app/views/error.gsp",
-        "grails-app/domain/test/**",
-        "grails-app/i18n/**",
-        "web-app/**",
-        "scripts/**",
     ]
-    def title = "Grails Domain Locking Plugin"
-    def author = "GGAO"
+    def title = "Domain Locking"
+    def author = "Yasuharu NAKANO"
+    def authorEmail = "ynak@jggug.org"
+    def organization = [ name: "Japan Grails/Groovy User Group", url: "http://www.jggug.org/" ]
     def license = "APACHE"
-    def description = 'This plugin provides a easy way for optimistic/pessimistic locking.'
-    def organization = [name: "NTT Software Coporation", url: "http://www.nttsoft.com/"]
-    def developers = [
-        [name: "Yasuharu NAKANO", email: "nakano.yasuharu@po.ntts.co.jp"],
-    ]
+    def description = 'Provides a easy way to use optimistic/pessimistic locking.'
+    def documentation = "http://kobo.github.com/grails-domain-locking/"
+    def scm = [url: "https://github.com/kobo/grails-domain-locking"]
+    def issueManagement = [system: "GitHub Issues", url: "https://github.com/kobo/grails-domain-locking/issues"]
 
     def doWithDynamicMethods = { applicationContext ->
         for (domainClass in application.domainClasses) {
