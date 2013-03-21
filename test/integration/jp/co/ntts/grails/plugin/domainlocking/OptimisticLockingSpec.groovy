@@ -24,7 +24,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
     }
 
     @Unroll
-    def "withOptimisticLock: calls or not onFailure handler when persistentVersion( #persistentVersion ) #operator modificationBaseVersion( #modificationBaseVersion )"() {
+    def "withOptimisticLock: calls or not onConflict handler when persistentVersion( #persistentVersion ) #operator modificationBaseVersion( #modificationBaseVersion )"() {
         given:
         testDomain.version = persistentVersion
 
@@ -33,7 +33,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
             assert executedMain
             assert domain.id == testDomain.id
             return "OK"
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             assert domain.id == testDomain.id
             return "NG"
         }
@@ -68,7 +68,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             return "OK"
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             assert false
         }
 
@@ -76,7 +76,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         result.returnValue == "OK"
     }
 
-    def "withOptimisticLock: executes main clause and returns its return value when onFailure isn't specified and the locking is succeed"() {
+    def "withOptimisticLock: executes main clause and returns its return value when onConflict isn't specified and the locking is succeed"() {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain, 1) { domain ->
             return "OK"
@@ -86,7 +86,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         result.returnValue == "OK"
     }
 
-    def "withOptimisticLock: returns null when onFailure isn't specified and the locking is failed"() {
+    def "withOptimisticLock: returns null when onConflict isn't specified and the locking is failed"() {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain, 0) { domain ->
             assert false
@@ -100,14 +100,14 @@ class OptimisticLockingSpec extends IntegrationSpec {
     }
 
     @Unroll
-    def "withOptimisticLock: calls onFailure handler when #exception.class.name was thrown"() {
+    def "withOptimisticLock: calls onConflict handler when #exception.class.name was thrown"() {
         given:
         def exception = new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
 
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw exception
-        }.onFailure { domain, caused ->
+        }.onConflict { domain, caused ->
             assert domain.id == testDomain.id
             assert domain.version == testDomain.version
             assert caused.is(exception)
@@ -121,7 +121,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         assertVersionConflict(testDomain)
     }
 
-    def "withOptimisticLock: returns null when called without onFailure handler"() {
+    def "withOptimisticLock: returns null when called without onConflict handler"() {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
@@ -144,7 +144,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
             testDomain.value = null
             testDomain.save(validate: false)
             return "OK"
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             return "NG"
         }
 
@@ -156,7 +156,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         when:
         OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             assert false
         }
 
@@ -165,11 +165,11 @@ class OptimisticLockingSpec extends IntegrationSpec {
         e.message == "EXCEPTION_FOR_TEST"
     }
 
-    def "withOptimisticLock: throws the original exception when an exception occurs in onFailure closure"() {
+    def "withOptimisticLock: throws the original exception when an exception occurs in onConflict closure"() {
         when:
         OptimisticLocking.withOptimisticLock(testDomain, 0) { domain ->
             assert false
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }
 
@@ -205,15 +205,15 @@ class OptimisticLockingSpec extends IntegrationSpec {
         OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             history << "mainClosure"
             throw exception
-        }.onFailure {->
+        }.onConflict {->
             history << "failureHandler of no args"
-        }.onFailure {
+        }.onConflict {
             history << "failureHandler of 1 arg as implicit 'it'"
             assert it.is(testDomain)
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             history << "failureHandler of 1 arg as explicit 'domain'"
             assert domain.is(testDomain)
-        }.onFailure { domain, caused ->
+        }.onConflict { domain, caused ->
             history << "failureHandler of 2 args"
             assert caused.is(exception)
         }

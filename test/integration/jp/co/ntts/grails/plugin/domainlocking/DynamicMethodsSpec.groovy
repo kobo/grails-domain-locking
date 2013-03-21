@@ -19,7 +19,7 @@ class DynamicMethodsSpec extends IntegrationSpec {
         when:
         def result = testDomain.withOptimisticLock(0) { domain ->
             return "OK"
-        }.onFailure { domain ->
+        }.onConflict { domain ->
             assert false
         }
 

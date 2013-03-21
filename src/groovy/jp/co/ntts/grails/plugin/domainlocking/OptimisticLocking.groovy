@@ -63,7 +63,7 @@ class OptimisticLocking {
         boolean succeed
         Throwable caused
 
-        Result onFailure(Closure failureHandler) {
+        Result onConflict(Closure failureHandler) {
             return new Result(
                 returnValue: (succeed || !failureHandler) ? returnValue : evaluateReturnValue(failureHandler),
                 domain: domain,
