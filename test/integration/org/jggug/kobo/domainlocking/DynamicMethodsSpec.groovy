@@ -1,4 +1,4 @@
-package jp.co.ntts.grails.plugin.domainlocking
+package org.jggug.kobo.domainlocking
 
 import grails.plugin.spock.IntegrationSpec
 import test.TestDomain

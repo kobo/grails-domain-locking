@@ -1,5 +1,5 @@
-import jp.co.ntts.grails.plugin.domainlocking.OptimisticLocking
-import jp.co.ntts.grails.plugin.domainlocking.PessimisticLocking
+import org.jggug.kobo.domainlocking.OptimisticLocking
+import org.jggug.kobo.domainlocking.PessimisticLocking
 
 class DomainLockingGrailsPlugin {
 

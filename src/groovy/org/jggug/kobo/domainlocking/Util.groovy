@@ -1,4 +1,4 @@
-package jp.co.ntts.grails.plugin.domainlocking
+package org.jggug.kobo.domainlocking
 
 class Util {
 

@@ -1,4 +1,4 @@
-package jp.co.ntts.grails.plugin.domainlocking
+package org.jggug.kobo.domainlocking
 
 import groovy.util.logging.Commons
 import org.springframework.dao.OptimisticLockingFailureException

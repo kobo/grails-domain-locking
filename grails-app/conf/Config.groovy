@@ -7,7 +7,7 @@ log4j = {
     environments {
         test {
             root {
-                debug "jp.co.ntts.grails.plugin.domainlocking.*"
+                debug "org.jggug.kobo.domainlocking.*"
             }
         }
     }

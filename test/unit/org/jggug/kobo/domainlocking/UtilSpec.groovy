@@ -1,5 +1,6 @@
-package jp.co.ntts.grails.plugin.domainlocking
+package org.jggug.kobo.domainlocking
 import grails.plugin.spock.UnitSpec
+import org.jggug.kobo.domainlocking.Util
 
 class UtilSpec extends UnitSpec {
 

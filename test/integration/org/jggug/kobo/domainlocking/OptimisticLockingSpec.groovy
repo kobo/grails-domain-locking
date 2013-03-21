@@ -1,6 +1,7 @@
-package jp.co.ntts.grails.plugin.domainlocking
+package org.jggug.kobo.domainlocking
 
 import grails.plugin.spock.IntegrationSpec
+import org.jggug.kobo.domainlocking.OptimisticLocking
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
