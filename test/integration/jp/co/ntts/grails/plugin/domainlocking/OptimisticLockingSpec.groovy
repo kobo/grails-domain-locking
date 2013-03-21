@@ -231,6 +231,32 @@ class OptimisticLockingSpec extends IntegrationSpec {
         ]
     }
 
+    def "withOptimisticLock: can have a failureHandler Closure which receives null as 2nd argument when failed at version comparation"() {
+        when:
+        def result = OptimisticLocking.withOptimisticLock(testDomain, 0) { domain ->
+            assert false
+        }.onConflict { domain, caused ->
+            assert domain.is(testDomain)
+            assert caused == null
+            return "NG"
+        }
+
+        then:
+        result.returnValue == "NG"
+    }
+
+    def "withOptimisticLock: cannot have a failureHandler Closure which receives more than 3 arguments"() {
+        when:
+        OptimisticLocking.withOptimisticLock(testDomain, 0) { domain ->
+            assert false
+        }.onConflict { domain, caused, tooMany ->
+            assert false
+        }
+
+        then:
+        thrown(IllegalArgumentException)
+    }
+
     private static void assertVersionConflict(domain) {
         assert domain.hasErrors()
         def errors = domain.errors.getFieldErrors("version")
