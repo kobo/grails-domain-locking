@@ -1,7 +1,6 @@
 package jp.co.ntts.grails.plugin.domainlocking
 
 import groovy.util.logging.Commons
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Commons
@@ -29,9 +28,6 @@ class OptimisticLocking {
 
             return new Result(returnValue: returnValue, domain: domain, succeed: true)
 
-        } catch (DataIntegrityViolationException e) {
-            log.debug "Constraint violation occurred.", e
-            return handleFailure(domain, e)
         } catch (OptimisticLockingFailureException e) {
             log.debug "Optimistic locking conflicted.", e
             return handleFailure(domain, e)

@@ -101,6 +101,9 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     @Unroll
     def "withOptimisticLock: calls onFailure handler when #exception.class.name was thrown"() {
+        given:
+        def exception = new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
+
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw exception
@@ -116,12 +119,6 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
         and:
         assertVersionConflict(testDomain)
-
-        where:
-        exception << [
-            new OptimisticLockingFailureException("EXCEPTION_FOR_TEST"),
-            new DataIntegrityViolationException("EXCEPTION_FOR_TEST"),
-        ]
     }
 
     def "withOptimisticLock: returns null when called without onFailure handler"() {
@@ -142,17 +139,17 @@ class OptimisticLockingSpec extends IntegrationSpec {
         testDomain.save(failOnError: true, flush: true)
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             // to make DataIntegrityViolationException occur by flushing
             testDomain.value = null
             testDomain.save(validate: false)
-        }.onFailure { domain, caused ->
-            assert caused instanceof DataIntegrityViolationException
+            return "OK"
+        }.onFailure { domain ->
             return "NG"
         }
 
         then:
-        result.returnValue == "NG"
+        thrown(DataIntegrityViolationException)
     }
 
     def "withOptimisticLock: throws the original exception when an exception excepting OptimisticLockingFailureException and DataIntegrityViolationException occurs in main closure"() {
@@ -201,7 +198,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: can have some following failureHandler Closure which receives 0-3 argument(s)"() {
         given:
-        def exception = new DataIntegrityViolationException("EXCEPTION_FOR_TEST")
+        def exception = new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         def history = []
 
         when:
@@ -221,7 +218,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
             assert caused.is(exception)
         }
 
-        then: "DataIntegrityViolationException isn't thrown to caller"
+        then: "OptimisticLockingFailureException isn't thrown to caller"
         noExceptionThrown()
 
         and: "all failureHandlers are executed"
