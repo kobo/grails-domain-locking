@@ -13,9 +13,7 @@
  */
 
 package org.jggug.kobo.domainlocking
-
 import grails.plugin.spock.IntegrationSpec
-import org.jggug.kobo.domainlocking.OptimisticLocking
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
@@ -46,10 +44,10 @@ class OptimisticLockingSpec extends IntegrationSpec {
         when:
         def result = OptimisticLocking.withOptimisticLock(testDomain, modificationBaseVersion) { domain ->
             assert executedMain
-            assert domain.id == testDomain.id
+            assert domain.is(testDomain)
             return "OK"
         }.onConflict { domain ->
-            assert domain.id == testDomain.id
+            assert domain.is(testDomain)
             return "NG"
         }
 
@@ -123,8 +121,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         def result = OptimisticLocking.withOptimisticLock(testDomain) { domain ->
             throw exception
         }.onConflict { domain, caused ->
-            assert domain.id == testDomain.id
-            assert domain.version == testDomain.version
+            assert domain.is(testDomain)
             assert caused.is(exception)
             return "NG"
         }
