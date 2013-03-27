@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2.4 Smart Invoker 0.2</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/gettingStarted.html"><strong>2</strong><span>Getting Started</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Provides a easy way to use optimistic/pessimistic locking.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>2.4 Smart Invoker - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Yasuharu NAKANO</p>
+
+                    <p><strong>Version:</strong> 0.2</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="smartInvoker">2.4 Smart Invoker</h2>
+A simple client as the above isn't convenient very much in order to invoke a test file from editors or IDEs,
+because it needs a complicated construction of arguments for each test type.
+So the improx plugin provides smart invoker scripts, which can invoke any <code>.groovy</code> file in an appropriate way.<p class="paragraph"/>For giving more benefit, you should set up your editor or IDE to be able to integrate with this plugin.
+See guide:integrationWithEditors.<p class="paragraph"/><h3>Shell Script</h3><p class="paragraph"/>If shell script is available in your environment, you can use clientScripts.<p class="paragraph"/><div class="code"><pre>improxSmartInvoker.sh /path/to/yourApp/test/unit/sample/SampleUnitTests.groovy &#45;&#45;&#91;1&#93;
+improxSmartInvoker.sh /path/to/yourApp/test/integration/sample/SampleIntegTests.groovy &#45;&#45;&#91;2&#93;
+improxSmartInvoker.sh /path/to/yourApp/test/functional/sample/SampleFuncTests.groovy &#45;&#45;&#91;3&#93;
+improxSmartInvoker.sh /path/to/scriptDir/myTribialScript.groovy &#45;&#45;&#91;4&#93;</pre></div>
+<ul class="star">
+<li><code>&#91;1&#93;</code> invokes '<code>test-app unit: sample.SampleUnitTests</code>' on the interactive mode.</li>
+<li><code>&#91;2&#93;</code> invokes '<code>test-app integration: sample.SampleIntegTests</code>' on the interactive mode.</li>
+<li><code>&#91;3&#93;</code> invokes '<code>grails test-app functional: sample.SampleFuncTests</code>' as new standalone Grails process.</li>
+<li><code>&#91;4&#93;</code> invokes '<code>groovy /path/to/scriptDir/myTribialScript.groovy</code>' as a normal Groovy script.&#10;  If you've istalled GroovyServ, the <code>groovyclient</code> is automatically used instead of <code>groovy</code> command.</li>
+</ul><p class="paragraph"/><h3>Groovy Script</h3><p class="paragraph"/>If there is <code>groovy</code> command in your environment, you can use clientScripts.<p class="paragraph"/><div class="code"><pre>groovy improxSmartInvoker.groovy /path/to/yourApp/test/unit/sample/SampleUnitTests.groovy &#45;&#45;&#91;1&#93;
+groovy improxSmartInvoker.groovy /path/to/yourApp/test/integration/sample/SampleIntegTests.groovy &#45;&#45;&#91;2&#93;
+groovy improxSmartInvoker.groovy /path/to/yourApp/test/functional/sample/SampleFuncTests.groovy &#45;&#45;&#91;3&#93;
+groovy improxSmartInvoker.groovy /path/to/scriptDir/myTribialScript.groovy &#45;&#45;&#91;4&#93;</pre></div>
+<ul class="star">
+<li><code>&#91;1&#93;</code> invokes '<code>test-app unit: sample.SampleUnitTests</code>' on the interactive mode.</li>
+<li><code>&#91;2&#93;</code> invokes '<code>test-app integration: sample.SampleIntegTests</code>' on the interactive mode.</li>
+<li><code>&#91;3&#93;</code> invokes '<code>grails test-app functional: sample.SampleFuncTests</code>' as new standalone Grails process.</li>
+<li><code>&#91;4&#93;</code> invokes '<code>groovy /path/to/scriptDir/myTribialScript.groovy</code>' as a normal Groovy script.&#10;  If you've istalled GroovyServ, the <code>groovyclient</code> is automatically used instead of <code>groovy</code> command.</li>
+</ul><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3438563-6']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

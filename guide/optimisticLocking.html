@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>2 Optimistic Locking 0.2</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/optimisticLocking.html"><strong>2</strong><span>Optimistic Locking</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/pessimisticLocking.html"><strong>3</strong><span>Pessimistic Locking</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>Provides an easy way to use optimistic/pessimistic lock.</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../guide/pessimisticLocking.html"><strong>3</strong><span>Pessimistic Locking</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>2 Optimistic Locking - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Yasuharu NAKANO</p>
+
+                    <p><strong>Version:</strong> 0.2</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h1 id="optimisticLocking">2 Optimistic Locking</h1>
+In order to handle optimistic locking, use <code>withOptimisticLock</code> method which is injected to domain class by the plugin.
+<ul class="minus">
+<li><code>withOptimisticLock</code> method compares a version of modification base with current version.</li>
+<ul class="minus">
+<li><code>withOptimisticLocking</code>'s closure is invoked only when version of modification base &#60; current persistent version is <code>true</code>.</li>
+</ul>
+<li>When version of modification base &#60; current persistent version is <code>false</code> or <code>OptimisticLockingFailureException</code> is catched,</li>
+<ul class="minus">
+<li>it invokes <code>onConflict</code> closure.</li>
+<li>it sets error messages to the domain instance.</li>
+</ul>
+<li>An exception except <code>OptimisticLockingFailureException</code> is thrown untouched.</li>
+</ul><p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;<p class="paragraph"/>    // operation which might causes <code>OptimisticLockingFailureException</code>.
+    // Here is invoked only when a version of modification base &#60; current persistent version.<p class="paragraph"/>&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;<p class="paragraph"/>    // operation to handle a failure of optimistic locking
+    // e.g. to render edit page <span class="java&#45;keyword">for</span> re&#45;input
+&#125;</pre></div><p class="paragraph"/>
+<h3>Type of modificationBaseVersion</h3><p class="paragraph"/><code>modificationBaseVersion</code> allows either <code>Number</code> (<code>Long</code>, <code>Integer</code>, etc.) or <code>String</code>.
+So you can pass the value of <code>params</code> in controller.<p class="paragraph"/>
+<h3>Skip a version comparation</h3><p class="paragraph"/>If a copmaration of version is unnecessary, you can ommit <code>modificationBaseVersion</code> arguments as follows.
+In this case, the main closure will be always invoked.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    // Here is always invoked regardless of the versions.
+&#125;</pre></div><p class="paragraph"/>
+<h3>onConflict is optional</h3><p class="paragraph"/>If you don't have nothing to do for conflict, you can omit <code>onConflict</code>.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    // &#8230;
+&#125;</pre></div><p class="paragraph"/>In this case, when something fails, it just only set error message to domain class.<p class="paragraph"/>
+<h3>Closure arguments</h3><p class="paragraph"/><code>domain</code> equals to delegate object, namely <code>sampleDomain</code>. So you can use each one as you want.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    assert domain.is(sampleDomain)
+&#125;</pre></div><p class="paragraph"/>arguments of <code>onConflict</code>'s closure are all optional. so you can omit them. The followings are all valid.<p class="paragraph"/><div class="code"><pre>/&#42; &#8230; &#42;/.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62; /&#42; &#8230; &#42;/ &#125;
+/&#42; &#8230; &#42;/.onConflict &#123; <span class="java&#45;object">Object</span> domain &#45;&#62; /&#42; &#8230; &#42;/ &#125;
+/&#42; &#8230; &#42;/.onConflict &#123; &#45;&#62; /&#42; &#8230; &#42;/ &#125;</pre></div><p class="paragraph"/>
+<h3>Return value</h3><p class="paragraph"/>If you want a return value from closure, you can receive it via <code>returnValue</code> property.<p class="paragraph"/><div class="code"><pre>def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"OK"</span>
+&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"NG"</span>
+&#125;
+assert result.returnValue == <span class="java&#45;quote">"OK"</span></pre></div><p class="paragraph"/>In case of conflict, a return value of <code>onConflict</code>'s closure is returned.
+<div class="code"><pre>assert result.returnValue == <span class="java&#45;quote">"NG"</span></pre></div>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/introduction.html">&lt;&lt; <strong>1</strong><span>Introduction</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../guide/pessimisticLocking.html"><strong>3</strong><span>Pessimistic Locking</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Domain Classes</h1><div class="menu-sub">
+                        
+                            <div class="menu-item"><a href="../ref/Domain%20Classes/Usage.html">Usage</a></div>
+                            
+                            
+                            <div class="menu-item"><a href="../ref/Domain%20Classes/withOptimisticLock.html">withOptimisticLock</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Domain%20Classes/withPessimisticLock.html">withPessimisticLock</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3438563-6']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,6 @@
+target
+.gradle
+build
+*.zip
+web-app
+plugin.xml

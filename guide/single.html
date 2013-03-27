@@ -1,0 +1,300 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+    <head>
+        <title>Domain Locking 0.2</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
+        <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
+    <script type="text/javascript">
+function addJsClass(el) {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+    </head>
+
+    <body class="body" onload="addJsClass();">
+        <div id="navigation">
+            <ul>
+                <li>
+                    <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                        <a href="../guide/index.html" class="button">Table of contents</a>
+                        <div id="nav-summary-childs" style="display:none;">
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#optimisticLocking"><strong>2</strong><span>Optimistic Locking</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#pessimisticLocking"><strong>3</strong><span>Pessimistic Locking</span></a></div>
+                            
+                        </div>
+                    </div>
+                </li>
+                <li class="separator selected">
+                    <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+                </li>
+            </ul>
+        </div>
+        <div id="header">
+            <div class="images clearfix">
+                
+                
+            </div>
+            <p>Provides an easy way to use optimistic/pessimistic lock.</p>
+        </div>
+
+
+        <table id="colset" border="0" cellpadding="0" cellspacing="0">
+            <tr>
+                <td id="col1">
+                    <div id="main" class="corner-all">
+
+                        <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                        <div class="project">
+                            <h1>Domain Locking - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Yasuharu NAKANO</p>
+                            <p><strong>Version:</strong> 0.2</p>
+                            
+                        </div>
+
+                        
+                        <div id="table-of-content">
+                            <h2>Table of Contents</h2>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#introduction"><strong>1</strong><span>Introduction</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#optimisticLocking"><strong>2</strong><span>Optimistic Locking</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#pessimisticLocking"><strong>3</strong><span>Pessimistic Locking</span></a></div>
+                            
+                            <div style="clear:both" ></div>
+                        </div>
+                        
+                        
+
+<h1 id="introduction">1 Introduction</h1>
+Grails supports for optimistic locking at default by implicit <code>version</code> property of domain class.
+When an user updates domain properties via user interface on browser, <code>version</code>'s value must be passed via hidden form and be checked properly at controller.<p class="paragraph"/>In a scaffolded controller, the version of the domain instance is compared with the value which is used when displaying edit page.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+    def sampleInstance = Sample.get(id)
+    <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
+        flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
+        redirect(action: <span class="java&#45;quote">"list"</span>)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (version != <span class="java&#45;keyword">null</span>) &#123;
+        <span class="java&#45;keyword">if</span> (sampleInstance.version &#62; version) &#123;
+            sampleInstance.errors.rejectValue(<span class="java&#45;quote">"version"</span>, <span class="java&#45;quote">"<span class="java&#45;keyword">default</span>.optimistic.locking.failure"</span>,
+                      &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample')&#93; as <span class="java&#45;object">Object</span>&#91;&#93;,
+                      <span class="java&#45;quote">"Another user has updated <span class="java&#45;keyword">this</span> Sample <span class="java&#45;keyword">while</span> you were editing"</span>)
+            render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+            <span class="java&#45;keyword">return</span>
+        &#125;
+    &#125;<p class="paragraph"/>    sampleInstance.properties = params<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (!sampleInstance.save(flush: <span class="java&#45;keyword">true</span>)) &#123;
+        render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    flash.message = message(code: '<span class="java&#45;keyword">default</span>.updated.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), sampleInstance.id&#93;)
+    redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)
+&#125;</pre></div><p class="paragraph"/>But the above code isn't enough to care about conflict of users' operations.
+After comparing version, <code>save</code> method might cause a conflict error at the layer of Hibernate.<p class="paragraph"/>
+To easy to reproduce a problem, append a <code>sleep</code> line into the code.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+    def sampleInstance = Sample.get(id)
+    <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
+        flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
+        redirect(action: <span class="java&#45;quote">"list"</span>)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (version != <span class="java&#45;keyword">null</span>) &#123;
+        <span class="java&#45;keyword">if</span> (sampleInstance.version &#62; version) &#123;
+            sampleInstance.errors.rejectValue(<span class="java&#45;quote">"version"</span>, <span class="java&#45;quote">"<span class="java&#45;keyword">default</span>.optimistic.locking.failure"</span>,
+                      &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample')&#93; as <span class="java&#45;object">Object</span>&#91;&#93;,
+                      <span class="java&#45;quote">"Another user has updated <span class="java&#45;keyword">this</span> Sample <span class="java&#45;keyword">while</span> you were editing"</span>)
+            render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+            <span class="java&#45;keyword">return</span>
+        &#125;
+    &#125;<p class="paragraph"/>    sampleInstance.properties = params<p class="paragraph"/>    sleep 10000 // TEMP &#60;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45;&#45; HERE!!<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (!sampleInstance.save(flush: <span class="java&#45;keyword">true</span>)) &#123;
+        render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    flash.message = message(code: '<span class="java&#45;keyword">default</span>.updated.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), sampleInstance.id&#93;)
+    redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)
+&#125;</pre></div><p class="paragraph"/>Procedure to reproduce:
+<ol>
+<li>Run the application by run-app command</li>
+<li>Open the edit pages of the same domain instance on two independent browser windows</li>
+<li>Click <code>Update</code> button at a window.</li>
+<li>Click <code>Update</code> button at another window within 10 seconds.</li>
+</ol><p class="paragraph"/>Then you will see an error page and there are the following error message at console:<p class="paragraph"/><div class="code"><pre>| Error 2013&#45;03&#45;26 14:17:40,852 &#91;http&#45;bio&#45;8080&#45;exec&#45;1&#93; ERROR errors.GrailsExceptionResolver  &#45; StaleObjectStateException occurred when processing request: &#91;POST&#93; /grails&#45;sample/sample/index &#45; parameters:
+id: 1
+_action_update: Update
+value: XXXXX
+version: 1
+Row was updated or deleted by another transaction (or unsaved&#45;value mapping was incorrect): &#91;grails.sample.Sample&#35;1&#93;. Stacktrace follows:
+Message: Row was updated or deleted by another transaction (or unsaved&#45;value mapping was incorrect): &#91;grails.sample.Sample&#35;1&#93;
+    Line | Method
+&#45;&#62;&#62;   78 | update    in grails.sample.SampleController
+&#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45; &#45;
+|    195 | doFilter  in grails.plugin.cache.web.filter.PageFragmentCachingFilter
+|     63 | doFilter  in grails.plugin.cache.web.filter.AbstractFilter
+|   1145 | runWorker in java.util.concurrent.ThreadPoolExecutor
+|    615 | run . . . in java.util.concurrent.ThreadPoolExecutor$Worker
+^    722 | run       in java.lang.<span class="java&#45;object">Thread</span></pre></div><p class="paragraph"/>Yes. You must handle <code>org.springframework.dao.OptimisticLockingFailureException</code> (wrapping <code>net.sf.hibernate.StateObjectStateException</code>) like the followings.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+    def sampleInstance = Sample.get(id)
+    <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
+        flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
+        redirect(action: <span class="java&#45;quote">"list"</span>)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">if</span> (version != <span class="java&#45;keyword">null</span>) &#123;
+        <span class="java&#45;keyword">if</span> (sampleInstance.version &#62; version) &#123;
+            sampleInstance.errors.rejectValue(<span class="java&#45;quote">"version"</span>, <span class="java&#45;quote">"<span class="java&#45;keyword">default</span>.optimistic.locking.failure"</span>,
+                      &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample')&#93; as <span class="java&#45;object">Object</span>&#91;&#93;,
+                      <span class="java&#45;quote">"Another user has updated <span class="java&#45;keyword">this</span> Sample <span class="java&#45;keyword">while</span> you were editing"</span>)
+            render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+            <span class="java&#45;keyword">return</span>
+        &#125;
+    &#125;<p class="paragraph"/>    sampleInstance.properties = params<p class="paragraph"/>    sleep 10000 // TEMP <span class="java&#45;keyword">for</span> easily reproducingreproducing<p class="paragraph"/>    <span class="java&#45;keyword">try</span> &#123;
+        <span class="java&#45;keyword">if</span> (!sampleInstance.save(flush: <span class="java&#45;keyword">true</span>)) &#123;
+            render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+            <span class="java&#45;keyword">return</span>
+        &#125;<p class="paragraph"/>        flash.message = message(code: '<span class="java&#45;keyword">default</span>.updated.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), sampleInstance.id&#93;)
+        redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)<p class="paragraph"/>    &#125; <span class="java&#45;keyword">catch</span> (OptimisticLockingFailureException e) &#123;
+        // It isn't DRY!!
+        sampleInstance.errors.rejectValue(<span class="java&#45;quote">"version"</span>, <span class="java&#45;quote">"<span class="java&#45;keyword">default</span>.optimistic.locking.failure"</span>,
+                  &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample')&#93; as <span class="java&#45;object">Object</span>&#91;&#93;,
+                  <span class="java&#45;quote">"Another user has updated <span class="java&#45;keyword">this</span> Sample <span class="java&#45;keyword">while</span> you were editing"</span>)
+        render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+    &#125;
+&#125;</pre></div><p class="paragraph"/>This works well but it's ugly because there are duplicated codes.<p class="paragraph"/>
+You can write the code as follows by using Domain Locking plugin:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+    def sampleInstance = Sample.get(id)
+    <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
+        flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
+        redirect(action: <span class="java&#45;quote">"list"</span>)
+        <span class="java&#45;keyword">return</span>
+    &#125;<p class="paragraph"/>    sampleInstance.withOptimisticLock(version) &#123;
+        sampleInstance.properties = params<p class="paragraph"/>        sleep 10000 // TEMP <span class="java&#45;keyword">for</span> easily reproducing<p class="paragraph"/>        <span class="java&#45;keyword">if</span> (!sampleInstance.save(flush: <span class="java&#45;keyword">true</span>)) &#123;
+            render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+            <span class="java&#45;keyword">return</span>
+        &#125;<p class="paragraph"/>        flash.message = message(code: '<span class="java&#45;keyword">default</span>.updated.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), sampleInstance.id&#93;)
+        redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)<p class="paragraph"/>    &#125;.onConflict &#123; domain &#45;&#62;
+        render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
+    &#125;
+&#125;</pre></div><p class="paragraph"/><code>withOptimisticLock</code> method compare the version and catch <code>OptimisticLockingFailureException</code> and set a error message to domain instance on conflict.
+
+
+
+<h1 id="optimisticLocking">2 Optimistic Locking</h1>
+In order to handle optimistic locking, use <code>withOptimisticLock</code> method which is injected to domain class by the plugin.
+<ul class="minus">
+<li><code>withOptimisticLock</code> method compares a version of modification base with current version.</li>
+<ul class="minus">
+<li><code>withOptimisticLocking</code>'s closure is invoked only when version of modification base &#60; current persistent version is <code>true</code>.</li>
+</ul>
+<li>When version of modification base &#60; current persistent version is <code>false</code> or <code>OptimisticLockingFailureException</code> is catched,</li>
+<ul class="minus">
+<li>it invokes <code>onConflict</code> closure.</li>
+<li>it sets error messages to the domain instance.</li>
+</ul>
+<li>An exception except <code>OptimisticLockingFailureException</code> is thrown untouched.</li>
+</ul><p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;<p class="paragraph"/>    // operation which might causes <code>OptimisticLockingFailureException</code>.
+    // Here is invoked only when a version of modification base &#60; current persistent version.<p class="paragraph"/>&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;<p class="paragraph"/>    // operation to handle a failure of optimistic locking
+    // e.g. to render edit page <span class="java&#45;keyword">for</span> re&#45;input
+&#125;</pre></div><p class="paragraph"/>
+<h3>Type of modificationBaseVersion</h3><p class="paragraph"/><code>modificationBaseVersion</code> allows either <code>Number</code> (<code>Long</code>, <code>Integer</code>, etc.) or <code>String</code>.
+So you can pass the value of <code>params</code> in controller.<p class="paragraph"/>
+<h3>Skip a version comparation</h3><p class="paragraph"/>If a copmaration of version is unnecessary, you can ommit <code>modificationBaseVersion</code> arguments as follows.
+In this case, the main closure will be always invoked.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    // Here is always invoked regardless of the versions.
+&#125;</pre></div><p class="paragraph"/>
+<h3>onConflict is optional</h3><p class="paragraph"/>If you don't have nothing to do for conflict, you can omit <code>onConflict</code>.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    // &#8230;
+&#125;</pre></div><p class="paragraph"/>In this case, when something fails, it just only set error message to domain class.<p class="paragraph"/>
+<h3>Closure arguments</h3><p class="paragraph"/><code>domain</code> equals to delegate object, namely <code>sampleDomain</code>. So you can use each one as you want.<p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    assert domain.is(sampleDomain)
+&#125;</pre></div><p class="paragraph"/>arguments of <code>onConflict</code>'s closure are all optional. so you can omit them. The followings are all valid.<p class="paragraph"/><div class="code"><pre>/&#42; &#8230; &#42;/.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62; /&#42; &#8230; &#42;/ &#125;
+/&#42; &#8230; &#42;/.onConflict &#123; <span class="java&#45;object">Object</span> domain &#45;&#62; /&#42; &#8230; &#42;/ &#125;
+/&#42; &#8230; &#42;/.onConflict &#123; &#45;&#62; /&#42; &#8230; &#42;/ &#125;</pre></div><p class="paragraph"/>
+<h3>Return value</h3><p class="paragraph"/>If you want a return value from closure, you can receive it via <code>returnValue</code> property.<p class="paragraph"/><div class="code"><pre>def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"OK"</span>
+&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"NG"</span>
+&#125;
+assert result.returnValue == <span class="java&#45;quote">"OK"</span></pre></div><p class="paragraph"/>In case of conflict, a return value of <code>onConflict</code>'s closure is returned.
+<div class="code"><pre>assert result.returnValue == <span class="java&#45;quote">"NG"</span></pre></div>
+
+
+
+<h1 id="pessimisticLocking">3 Pessimistic Locking</h1>
+In order to operate a domain instance on multi-threads sequentially, Grails provides <code>lock</code> method on domain class.
+I know its usage is very easy, but the plugin provides the wrapper wary <code>withPessimisticLock</code> as contract <code>withOptimisticLock</code>.
+<ul class="minus">
+<li><code>withPessimisticLock</code> method invoke the closure with the locked domain instance specified by <code>id</code>.</li>
+<li>If target row isn't found, <code>onNotFound</code> closure is invoked.</li>
+</ul><p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;<p class="paragraph"/>    // operation to require a pessimistic lock<p class="paragraph"/>&#125;.onNotFound &#123; &#45;&#62;<p class="paragraph"/>    // operation when the target is not found
+&#125;</pre></div><p class="paragraph"/>
+<h3>onNotFound is optional</h3><p class="paragraph"/>If you don't have nothing to do on target not found, you can omit <code>onNotFound</code>.<p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;
+    // &#8230;
+&#125;</pre></div><p class="paragraph"/>In this case, when target isn't found, all the plugin has to do is nothing.<p class="paragraph"/>
+<h3>Closure arguments</h3><p class="paragraph"/>The <code>lockedDomain</code> argument of <code>onNotFound</code>'s closure is the domain instance which is found by <code>SampleDomain.lock(id)</code> method.<p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;
+    assert lockedDomain.id == id
+&#125;</pre></div><p class="paragraph"/>There are no argument for <code>onNotFound</code>'s closure.<p class="paragraph"/>
+<h3>Return value</h3><p class="paragraph"/>If you want a return value from closure, you can receive it via <code>returnValue</code> property.<p class="paragraph"/><div class="code"><pre>def result = SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"OK"</span>
+&#125;.onNotFound &#123; &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"NG"</span>
+&#125;
+assert result.returnValue == <span class="java&#45;quote">"OK"</span></pre></div><p class="paragraph"/>In case that no row is found, a return value of <code>onNotFound</code>'s closure is returned.
+<div class="code"><pre>assert result.returnValue == <span class="java&#45;quote">"NG"</span></pre></div>
+
+
+                    </div>
+                </td>
+                <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Domain Classes</h1><div class="menu-sub">
+                        
+                        <div class="menu-item"><a href="../ref/Domain%20Classes/Usage.html">Usage</a></div>
+                        
+                        
+                        <div class="menu-item"><a href="../ref/Domain%20Classes/withOptimisticLock.html">withOptimisticLock</a>
+                        </div>
+                        
+                        <div class="menu-item"><a href="../ref/Domain%20Classes/withPessimisticLock.html">withPessimisticLock</a>
+                        </div>
+                        
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+            </tr>
+        </table>
+
+        <div id="footer">
+            
+            
+<script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-3438563-6']);
+    _gaq.push(['_trackPageview']);
+    (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+
+        </div>
+
+
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+    </body>
+</html>
