@@ -20,6 +20,9 @@ class DomainLockingGrailsPlugin {
     def version = "0.2"
     def grailsVersion = "2.0 > *"
     def pluginExcludes = [
+        "grails-app/domain/test/TestDomain.groovy",
+        "src/docs/**",
+        "scripts/PublishDocs.groovy",
     ]
     def title = "Domain Locking"
     def author = "Yasuharu NAKANO"
