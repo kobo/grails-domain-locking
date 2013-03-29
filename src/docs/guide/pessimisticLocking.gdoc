@@ -9,11 +9,13 @@ SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
 
     // operation to require a pessimistic lock
 
-}.onNotFound { ->
+}.onNotFound {domainId ->
 
     // operation when the target is not found
 }
 {code}
+
+See also [Optimistic and Pessimistic locking|http://grails.org/doc/latest/guide/single.html#locking] and [lock method|http://grails.org/doc/latest/ref/Domain%20Classes/lock.html] of domain class.
 
 
 h3. onNotFound is optional
@@ -31,7 +33,7 @@ In this case, when target isn't found, all the plugin has to do is nothing.
 
 h3. Closure arguments
 
-The @lockedDomain@ argument of @onNotFound@'s closure is the domain instance which is found by @SampleDomain.lock(id)@ method.
+The @lockedDomain@ argument of @withPessimisticLock@'s closure is the domain instance which is found by @SampleDomain.lock(id)@ method.
 
 {code}
 SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
@@ -39,7 +41,15 @@ SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
 }
 {code}
 
-There are no argument for @onNotFound@'s closure.
+The domainId argument of @onNotFound@'s closure is the domain id which is specified to @withPessimisticLock@'s first argument.
+
+{code}
+SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+    // ...
+}.onNotFound {domainId ->
+    assert domainId == id
+}
+{code}
 
 
 h3. Return value
@@ -59,3 +69,10 @@ In case that no row is found, a return value of @onNotFound@'s closure is return
 {code}
 assert result.returnValue == "NG"
 {code}
+
+
+h3. Transaction is required
+
+When you want to use a pessimistic lock, you must need a transaction.
+The aquired lock is automatically released when the transaction commits.
+

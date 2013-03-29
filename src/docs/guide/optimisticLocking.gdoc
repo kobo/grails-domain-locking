@@ -20,6 +20,8 @@ sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
 }
 {code}
 
+See also [Optimistic and Pessimistic locking|http://grails.org/doc/latest/guide/single.html#locking].
+
 
 h3. Type of modificationBaseVersion
 
@@ -88,3 +90,19 @@ In case of conflict, a return value of @onConflict@'s closure is returned.
 {code}
 assert result.returnValue == "NG"
 {code}
+
+
+h3. Flushing session
+
+In case of using persistence methods (e.g. @save@ method), you must be flush a session.
+
+{code}
+def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+    domain.save(flush: true)
+}.onConflict { Object domain, Throwable caused ->
+    return "NG" // In case of error, you can catch and handle it here.
+}
+{code}
+
+Otherwise, a conflict error occurs on flushing at outside of controller action and you cannot handle the error.
+Instead, you will see the 500 error page at development mode.
