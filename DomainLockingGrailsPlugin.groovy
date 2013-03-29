@@ -36,7 +36,7 @@ class DomainLockingGrailsPlugin {
 
     def doWithDynamicMethods = { applicationContext ->
         for (domainClass in application.domainClasses) {
-            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion, Closure mainClosure ->
+            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion = null, Closure mainClosure ->
                 OptimisticLocking.withOptimisticLock(delegate, modificationBaseVersion, mainClosure)
             }
 

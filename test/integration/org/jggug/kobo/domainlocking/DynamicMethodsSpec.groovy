@@ -41,6 +41,18 @@ class DynamicMethodsSpec extends IntegrationSpec {
         result.returnValue == "OK"
     }
 
+    def "withOptimisticLock: doesn't required modificationBaseVersion parameter"() {
+        when:
+        def result = testDomain.withOptimisticLock { domain ->
+            return "OK"
+        }.onConflict { domain ->
+            assert false
+        }
+
+        then:
+        result.returnValue == "OK"
+    }
+
     def "withPessimisticLock: delegates to PessimisticLocking.withPessimisticLock()"() {
         when:
         def result = TestDomain.withPessimisticLock(testDomain.id) { lockedDomain ->
