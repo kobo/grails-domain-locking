@@ -80,9 +80,9 @@ function addJsClass() {
 
 <h1 id="pessimisticLocking">3 Pessimistic Locking</h1>
 In order to operate a domain instance on multi-threads sequentially, Grails provides <code>lock</code> method on domain class.
-I know its usage is very easy, but the plugin provides the wrapper wary <code>withPessimisticLock</code> as contract <code>withOptimisticLock</code>.
+I know its usage is very easy, but the plugin provides the wrapper way for <code>withPessimisticLock</code> in the point of view of symmetry for <code>withOptimisticLock</code>.
 <ul class="minus">
-<li><code>withPessimisticLock</code> method invoke the closure with the locked domain instance specified by <code>id</code>.</li>
+<li><code>withPessimisticLock</code>  <em class="italic">static</em>  method invoke the closure with the locked domain instance specified by <code>id</code>.</li>
 <li>If target row isn't found, <code>onNotFound</code> closure is invoked.</li>
 </ul><p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;<p class="paragraph"/>    // operation to require a pessimistic lock<p class="paragraph"/>&#125;.onNotFound &#123; &#45;&#62;<p class="paragraph"/>    // operation when the target is not found
 &#125;</pre></div><p class="paragraph"/>
