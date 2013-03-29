@@ -1,7 +1,7 @@
 In order to operate a domain instance on multi-threads sequentially, Grails provides @lock@ method on domain class.
-I know its usage is very easy, but the plugin provides the wrapper wary @withPessimisticLock@ as contract @withOptimisticLock@.
+I know its usage is very easy, but the plugin provides the wrapper way for @withPessimisticLock@ in the point of view of symmetry for @withOptimisticLock@.
 
-- @withPessimisticLock@ method invoke the closure with the locked domain instance specified by @id@.
+- @withPessimisticLock@ _static_ method invoke the closure with the locked domain instance specified by @id@.
 - If target row isn't found, @onNotFound@ closure is invoked.
 
 {code}
