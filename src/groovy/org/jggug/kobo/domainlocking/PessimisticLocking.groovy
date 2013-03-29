@@ -22,14 +22,7 @@ class PessimisticLocking {
     static withPessimisticLock(Class lockingDomainClass, Long lockingDomainId, Closure mainClosure) {
         Util.shouldNotNull(lockingDomainClass: lockingDomainClass, lockingDomainId: lockingDomainId, mainClosure: mainClosure)
 
-        // when there is different between 1st level cache and 2nd level cache (e.g. after other session did update or delete),
-        // OptimisticLockingFailureException occurs. To prevent it, session should be flush and clear forcely.
-        lockingDomainClass.withSession { session ->
-            session.flush()
-            session.clear()
-        }
-
-        // acquire lock
+        // Acquire lock
         def lockedDomain = lockingDomainClass.lock(lockingDomainId)
         if (lockedDomain == null) {
             log.debug "Target not found: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}"
@@ -37,7 +30,7 @@ class PessimisticLocking {
         }
         log.debug "Acquired pessimistic lock: domainClass=${lockingDomainClass.name}, id=${lockingDomainId}, version=${lockedDomain.version}"
 
-        // execute main closure
+        // Execute main closure
         def returnValue = mainClosure.call(lockedDomain)
         return new Result(returnValue: returnValue, domainId: lockingDomainId, succeed: true)
     }
