@@ -25,19 +25,26 @@ class PessimisticLockingSpec extends IntegrationSpec {
     private static final long NOT_FOUND_ID = 9999
     private static final String TEST_VALUE = "PessimisticLockingSpec's TEST_VALUE"
 
+    def transactional = false
+
     def testDomain
 
     def setup() {
-        TestDomain.withNewTransaction {
-            TestDomain.list()*.delete(flush: true)
-            testDomain = new TestDomain(value: "PessimisticLockingSpec's TEST_VALUE").save(flush: true, failOnError: true)
+        TestDomain.withNewSession {
+            TestDomain.withNewTransaction {
+                TestDomain.list()*.delete(flush: true)
+                testDomain = new TestDomain(value: "PessimisticLockingSpec's TEST_VALUE").save(flush: true, failOnError: true)
+            }
         }
         assert TestDomain.count() == 1
     }
 
     def cleanupSpec() {
-        // workaround to delete the record on another independent transaction, to prevent affecting other tests.
-        TestDomain.list()*.delete(flush: true)
+        TestDomain.withNewSession {
+            TestDomain.withNewTransaction {
+                TestDomain.list()*.delete(flush: true)
+            }
+        }
     }
 
     def "withPessimisticLock: calls main closure when acquires a lock"() {
@@ -243,5 +250,38 @@ class PessimisticLockingSpec extends IntegrationSpec {
         then:
         def e = thrown(IllegalArgumentException)
         e.message == "mainClosure should not be null."
+    }
+
+    def "withPessimisticLock: sequencially executes closure with lock"() {
+        given:
+        def threads = []
+        def results = [] as CopyOnWriteArrayList
+        def history = [:]
+
+        when:
+        5.times { index ->
+            threads << Thread.start {
+                results << TestDomain.withNewSession {
+                    TestDomain.withNewTransaction { // required transaction for each thread
+                        PessimisticLocking.withPessimisticLock(TestDomain, testDomain.id) { lockedDomain ->
+                            history["$index:BEGIN"] = "BEGIN"
+                            lockedDomain.value = "VALUE:$index"
+                            lockedDomain.save(flush: false) // no-flush
+                            history["$index:END"] = "END"
+                            return "OK"
+                        }.onNotFound { id ->
+                            return "NG"
+                        }.returnValue
+                    }
+                }
+            }
+        }
+        threads*.join()
+
+        then:
+        results as List == ["OK"] * 5
+
+        and: "sequencially paired BEGIN/END"
+        history.collect { it.value } == ["BEGIN", "END"] * 5
     }
 }
