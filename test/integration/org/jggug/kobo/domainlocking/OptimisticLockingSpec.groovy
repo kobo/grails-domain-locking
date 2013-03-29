@@ -13,15 +13,10 @@
  */
 
 package org.jggug.kobo.domainlocking
-
 import grails.plugin.spock.IntegrationSpec
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
 import test.TestDomain
-
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.LinkedBlockingQueue
 
 class OptimisticLockingSpec extends IntegrationSpec {
 
@@ -162,67 +157,6 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
         and:
         assertVersionConflict(testDomain)
-    }
-
-    def "withOptimisticLock: flushes hibernate session implicitly in order to publish SQL within withOptimisticLock"() {
-        given:
-        def latch = new CountDownLatch(2)
-        def threads = []
-        def results = [] as LinkedBlockingQueue
-
-        when:
-        threads << Thread.start {
-            results << TestDomain.withNewSession {
-                OptimisticLocking.withOptimisticLock(TestDomain.get(testDomain.id)) { domain ->
-                    domain.value = "VALUE:1"
-                    domain.save(flush: false) // no-flush
-
-                    latch.countDown()
-                    latch.await()
-
-                    return "OK"
-                }.onConflict { domain ->
-                    return "NG"
-                }.returnValue
-            }
-        }
-        threads << Thread.start {
-            results << TestDomain.withNewSession {
-                OptimisticLocking.withOptimisticLock(TestDomain.get(testDomain.id)) { domain ->
-                    domain.value = "VALUE:2"
-                    domain.save(flush: false) // no-flush
-
-                    latch.countDown()
-                    latch.await()
-
-                    return "OK"
-                }.onConflict { domain ->
-                    return "NG"
-                }.returnValue
-            }
-        }
-        threads*.join()
-
-        then:
-        results as Set == ["OK", "NG"] as Set
-    }
-
-    def "withOptimisticLock: flushes hibernate session implicitly in order to publish SQL and made exception occur just in time if necessary"() {
-        given:
-        testDomain.save(failOnError: true, flush: true)
-
-        when:
-        OptimisticLocking.withOptimisticLock(testDomain) { domain ->
-            // to make DataIntegrityViolationException occur by flushing
-            testDomain.value = null
-            testDomain.save(validate: false)
-            return "OK"
-        }.onConflict { domain ->
-            return "NG"
-        }
-
-        then:
-        thrown(DataIntegrityViolationException)
     }
 
     def "withOptimisticLock: throws the original exception when an exception excepting OptimisticLockingFailureException and DataIntegrityViolationException occurs in main closure"() {

@@ -35,11 +35,6 @@ class OptimisticLocking {
         try {
             def returnValue = mainClosure.call(domain)
 
-            // To flush session only when mainClosure is succeed.
-            // If this were missed, runtime exception couldn't occur here.
-            // Instead, it would occur, for example, after an invocation of an action of a controller.
-            domain.withSession { it.flush() }
-
             return new Result(returnValue: returnValue, domain: domain, succeed: true)
 
         } catch (OptimisticLockingFailureException e) {
