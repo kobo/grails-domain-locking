@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>2 Optimistic Locking 0.2</title>
+    <title>2 Optimistic Locking 0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -71,7 +71,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Yasuharu NAKANO</p>
 
-                    <p><strong>Version:</strong> 0.2</p>
+                    <p><strong>Version:</strong> 0.3</p>
 
                     
                 </div>
@@ -96,7 +96,7 @@ In order to handle optimistic locking, use <code>withOptimisticLock</code> metho
 </ul><p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;<p class="paragraph"/>    // operation which might causes <code>OptimisticLockingFailureException</code>.
     // Here is invoked only when a version of modification base &#60; current persistent version.<p class="paragraph"/>&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;<p class="paragraph"/>    // operation to handle a failure of optimistic locking
     // e.g. to render edit page <span class="java&#45;keyword">for</span> re&#45;input
-&#125;</pre></div><p class="paragraph"/>
+&#125;</pre></div><p class="paragraph"/>See also <a href="http://grails.org/doc/latest/guide/single.html#locking" target="blank">Optimistic and Pessimistic locking</a>.<p class="paragraph"/>
 <h3>Type of modificationBaseVersion</h3><p class="paragraph"/><code>modificationBaseVersion</code> allows either <code>Number</code> (<code>Long</code>, <code>Integer</code>, etc.) or <code>String</code>.
 So you can pass the value of <code>params</code> in controller.<p class="paragraph"/>
 <h3>Skip a version comparation</h3><p class="paragraph"/>If a copmaration of version is unnecessary, you can ommit <code>modificationBaseVersion</code> arguments as follows.
@@ -117,7 +117,13 @@ In this case, the main closure will be always invoked.<p class="paragraph"/><div
     <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"NG"</span>
 &#125;
 assert result.returnValue == <span class="java&#45;quote">"OK"</span></pre></div><p class="paragraph"/>In case of conflict, a return value of <code>onConflict</code>'s closure is returned.
-<div class="code"><pre>assert result.returnValue == <span class="java&#45;quote">"NG"</span></pre></div>
+<div class="code"><pre>assert result.returnValue == <span class="java&#45;quote">"NG"</span></pre></div><p class="paragraph"/>
+<h3>Flushing session</h3><p class="paragraph"/>In case of using persistence methods (e.g. <code>save</code> method), you must be flush a session.<p class="paragraph"/><div class="code"><pre>def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;
+    domain.save(flush: <span class="java&#45;keyword">true</span>)
+&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;
+    <span class="java&#45;keyword">return</span> <span class="java&#45;quote">"NG"</span> // In <span class="java&#45;keyword">case</span> of error, you can <span class="java&#45;keyword">catch</span> and handle it here.
+&#125;</pre></div><p class="paragraph"/>Otherwise, a conflict error occurs on flushing at outside of controller action and you cannot handle the error.
+Instead, you will see the 500 error page at development mode.
 
 
 
