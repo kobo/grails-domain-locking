@@ -13,27 +13,45 @@
  */
 
 package org.jggug.kobo.domainlocking
+
 import grails.plugin.spock.IntegrationSpec
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
 import test.TestDomain
 
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.LinkedBlockingQueue
+
 class OptimisticLockingSpec extends IntegrationSpec {
+
+    def transactional = false
 
     def testDomain
 
     def setup() {
         assert TestDomain.list() == []
 
-        // saving TestDomain
-        testDomain = new TestDomain(value: "OptimisticLockingSpec's INIT_VALUE").save(failOnError: true, flush: true)
-        assert TestDomain.count() == 1
+        TestDomain.withNewSession {
+            TestDomain.withNewTransaction {
+                // saving TestDomain
+                testDomain = new TestDomain(value: "OptimisticLockingSpec's INIT_VALUE").save(failOnError: true, flush: true)
+                assert TestDomain.count() == 1
 
-        // updating version
-        testDomain.value = "OptimisticLockingSpec's TEST_VALUE"
-        testDomain.save(failOnError: true, flush: true)
-        assert testDomain.version == 1
+                // updating version
+                testDomain.value = "OptimisticLockingSpec's TEST_VALUE"
+                testDomain.save(failOnError: true, flush: true)
+                assert testDomain.version == 1
+            }
+        }
+    }
+
+    def cleanup() {
+        TestDomain.withNewSession {
+            TestDomain.withNewTransaction {
+                TestDomain.list()*.delete(flush: true)
+            }
+        }
     }
 
     @Unroll
@@ -144,6 +162,49 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
         and:
         assertVersionConflict(testDomain)
+    }
+
+    def "withOptimisticLock: flushes hibernate session implicitly in order to publish SQL within withOptimisticLock"() {
+        given:
+        def latch = new CountDownLatch(2)
+        def threads = []
+        def results = [] as LinkedBlockingQueue
+
+        when:
+        threads << Thread.start {
+            results << TestDomain.withNewSession {
+                OptimisticLocking.withOptimisticLock(TestDomain.get(testDomain.id)) { domain ->
+                    domain.value = "VALUE:1"
+                    domain.save(flush: false) // no-flush
+
+                    latch.countDown()
+                    latch.await()
+
+                    return "OK"
+                }.onConflict { domain ->
+                    return "NG"
+                }.returnValue
+            }
+        }
+        threads << Thread.start {
+            results << TestDomain.withNewSession {
+                OptimisticLocking.withOptimisticLock(TestDomain.get(testDomain.id)) { domain ->
+                    domain.value = "VALUE:2"
+                    domain.save(flush: false) // no-flush
+
+                    latch.countDown()
+                    latch.await()
+
+                    return "OK"
+                }.onConflict { domain ->
+                    return "NG"
+                }.returnValue
+            }
+        }
+        threads*.join()
+
+        then:
+        results as Set == ["OK", "NG"] as Set
     }
 
     def "withOptimisticLock: flushes hibernate session implicitly in order to publish SQL and made exception occur just in time if necessary"() {
