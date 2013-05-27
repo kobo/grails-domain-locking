@@ -3,7 +3,8 @@
 *.zip
 plugin.xml
 target
-*.idea
+.idea
+*.iml
 /improx-resources
 web-app
 /docs
