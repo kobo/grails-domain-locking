@@ -272,27 +272,21 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: doesn't bind default field error when errorBinding: false"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: false]) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: false]) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         testDomain.hasErrors() == false
     }
 
     def "withOptimisticLock: binds default field error when errorBinding: true explicitly"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: true]) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: true]) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 
@@ -301,14 +295,11 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = true
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 
@@ -317,14 +308,11 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = false
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         testDomain.hasErrors() == false
     }
 
@@ -333,14 +321,11 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = null
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 

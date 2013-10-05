@@ -126,7 +126,7 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception excepting OptimisticLockingFailureException and DataIntegrityViolationException occurs in main closure"() {
         when:
-        def result = testDomain.withOptimisticLock { domain ->
+        testDomain.withOptimisticLock { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }.onConflict { domain ->
             assert false
@@ -139,7 +139,7 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception occurs in onConflict closure"() {
         when:
-        def result = testDomain.withOptimisticLock(0) { domain ->
+        testDomain.withOptimisticLock(0) { domain ->
             assert false
         }.onConflict { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
@@ -152,27 +152,21 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
 
     def "withOptimisticLock: doesn't bind default field error when errorBinding: false"() {
         when:
-        def result = testDomain.withOptimisticLock(errorBinding: false) { domain ->
+        testDomain.withOptimisticLock(errorBinding: false) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         testDomain.hasErrors() == false
     }
 
     def "withOptimisticLock: binds default field error when errorBinding: true explicitly"() {
         when:
-        def result = testDomain.withOptimisticLock(errorBinding: true) { domain ->
+        testDomain.withOptimisticLock(errorBinding: true) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 
@@ -181,14 +175,11 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = true
 
         when:
-        def result = testDomain.withOptimisticLock { domain ->
+        testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 
@@ -197,14 +188,11 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = false
 
         when:
-        def result = testDomain.withOptimisticLock { domain ->
+        testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         testDomain.hasErrors() == false
     }
 
@@ -213,14 +201,11 @@ class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = null
 
         when:
-        def result = testDomain.withOptimisticLock { domain ->
+        testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
         then:
-        result.returnValue == null
-
-        and:
         assertFieldError(testDomain)
     }
 
