@@ -14,32 +14,32 @@
 
 package org.jggug.kobo.domainlocking
 
+import grails.util.Holders
 import groovy.util.logging.Commons
 import org.springframework.dao.OptimisticLockingFailureException
 
 @Commons
 class OptimisticLocking {
 
-    static withOptimisticLock(domain, modificationBaseVersion = null, Closure mainClosure) {
+    static withOptimisticLock(domain, modificationBaseVersion, Map params, Closure mainClosure) {
         Util.shouldNotNull(domain: domain, mainClosure: mainClosure)
 
         if (isDifferentVersion(domain.version, modificationBaseVersion)) {
             log.debug "Version is already updated by other session: domainClass=${domain.class.name}, id=${domain.id}, persistentVersion=${domain.version}, modificationBaseVersion=${modificationBaseVersion}"
-            return handleFailure(domain)
+            return handleFailure(domain, params)
         }
 
-        return executeMain(domain, mainClosure)
+        return executeMain(domain, params, mainClosure)
     }
 
-    private static Result executeMain(Object domain, Closure mainClosure) {
+    private static Result executeMain(Object domain, Map params, Closure mainClosure) {
         try {
             def returnValue = mainClosure.call(domain)
-
             return new Result(returnValue: returnValue, domain: domain, succeed: true)
 
         } catch (OptimisticLockingFailureException e) {
             log.debug "Optimistic locking conflicted.", e
-            return handleFailure(domain, e)
+            return handleFailure(domain, params, e)
         }
     }
 
@@ -56,9 +56,20 @@ class OptimisticLocking {
         return false
     }
 
-    private static Result handleFailure(domain, Throwable caused = null) {
-        bindFieldError(domain)
+    private static Result handleFailure(domain, Map params, Throwable caused = null) {
+        def grailsApplication = Holders.applicationContext.grailsApplication
+        def defaultErrorBinding = grailsApplication.config.grails?.plugins?.domainlocking?.defaultErrorBinding
+        if (notNullValue(params.errorBinding, defaultErrorBinding, true)) {
+            bindFieldError(domain)
+        }
         return new Result(returnValue: null, domain: domain, succeed: false, caused: caused)
+    }
+
+    private static notNullValue(Object... values) {
+        for (value in values) {
+            if (value != null) return value
+        }
+        return null
     }
 
     private static bindFieldError(domain) {

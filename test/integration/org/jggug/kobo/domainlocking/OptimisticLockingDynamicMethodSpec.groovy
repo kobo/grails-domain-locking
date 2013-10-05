@@ -19,7 +19,7 @@ import org.springframework.dao.OptimisticLockingFailureException
 import spock.lang.Unroll
 import test.TestDomain
 
-class OptimisticLockingSpec extends IntegrationSpec {
+class OptimisticLockingDynamicMethodSpec extends IntegrationSpec {
 
     static transactional = false
 
@@ -55,50 +55,9 @@ class OptimisticLockingSpec extends IntegrationSpec {
         }
     }
 
-    @Unroll
-    def "withOptimisticLock: calls or not onConflict handler when persistentVersion( #persistentVersion ) #operator modificationBaseVersion( #modificationBaseVersion )"() {
-        given:
-        testDomain.version = persistentVersion
-
-        when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, modificationBaseVersion, [:]) { domain ->
-            assert executedMain
-            assert domain.is(testDomain)
-            return "OK"
-        }.onConflict { domain ->
-            assert domain.is(testDomain)
-            return "NG"
-        }
-
-        then:
-        result.returnValue == expectedResult
-
-        and:
-        if (expectedResult == "NG") {
-            assertFieldError(testDomain)
-        }
-
-        where:
-        persistentVersion | modificationBaseVersion | operator | expectedResult | executedMain
-        0                 | 0                       | "="      | "OK"           | true
-        1                 | 1                       | "="      | "OK"           | true
-        10                | 10                      | "="      | "OK"           | true
-        100               | 100                     | "="      | "OK"           | true
-        0                 | 1                       | "<"      | "OK"           | true
-        0                 | 10                      | "<"      | "OK"           | true
-        1                 | 2                       | "<"      | "OK"           | true
-        10                | 11                      | "<"      | "OK"           | true
-        100               | 101                     | "<"      | "OK"           | true
-        1                 | 0                       | ">"      | "NG"           | false
-        2                 | 0                       | ">"      | "NG"           | false
-        2                 | 1                       | ">"      | "NG"           | false
-        11                | 10                      | ">"      | "NG"           | false
-        101               | 100                     | ">"      | "NG"           | false
-    }
-
     def "withOptimisticLock: executes main clause and returns its return value when versionCompare isn't specified"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             return "OK"
         }.onConflict { domain ->
             assert false
@@ -110,7 +69,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: executes main clause and returns its return value when onConflict isn't specified and the locking is succeed"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, 1, [:]) { domain ->
+        def result = testDomain.withOptimisticLock(1) { domain ->
             return "OK"
         }
 
@@ -120,7 +79,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: returns null when onConflict isn't specified and the locking is failed"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, 0, [:]) { domain ->
+        def result = testDomain.withOptimisticLock(0) { domain ->
             assert false
         }
 
@@ -137,7 +96,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         def exception = new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw exception
         }.onConflict { domain, caused ->
             assert domain.is(testDomain)
@@ -154,7 +113,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: returns null when called without onConflict handler"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -167,7 +126,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception excepting OptimisticLockingFailureException and DataIntegrityViolationException occurs in main closure"() {
         when:
-        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
         }.onConflict { domain ->
             assert false
@@ -180,7 +139,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: throws the original exception when an exception occurs in onConflict closure"() {
         when:
-        OptimisticLocking.withOptimisticLock(testDomain, 0, [:]) { domain ->
+        def result = testDomain.withOptimisticLock(0) { domain ->
             assert false
         }.onConflict { domain ->
             throw new IOException("EXCEPTION_FOR_TEST")
@@ -191,88 +150,9 @@ class OptimisticLockingSpec extends IntegrationSpec {
         e.message == "EXCEPTION_FOR_TEST"
     }
 
-    def "withOptimisticLock: throws IllegalArgumentException when called with no domain argument"() {
-        when:
-        OptimisticLocking.withOptimisticLock(null, null, [:], { /.../ })
-
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.message == "domain should not be null."
-    }
-
-    def "withOptimisticLock: throws IllegalArgumentException when called with no mainClosure argument"() {
-        when:
-        OptimisticLocking.withOptimisticLock(testDomain, null, [:], null)
-
-        then:
-        def e = thrown(IllegalArgumentException)
-        e.message == "mainClosure should not be null."
-    }
-
-    def "withOptimisticLock: can have some following failureHandler Closure which receives 0-3 argument(s)"() {
-        given:
-        def exception = new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
-        def history = []
-
-        when:
-        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
-            history << "mainClosure"
-            throw exception
-        }.onConflict { ->
-            history << "failureHandler of no args"
-        }.onConflict {
-            history << "failureHandler of 1 arg as implicit 'it'"
-            assert it.is(testDomain)
-        }.onConflict { domain ->
-            history << "failureHandler of 1 arg as explicit 'domain'"
-            assert domain.is(testDomain)
-        }.onConflict { domain, caused ->
-            history << "failureHandler of 2 args"
-            assert caused.is(exception)
-        }
-
-        then: "OptimisticLockingFailureException isn't thrown to caller"
-        noExceptionThrown()
-
-        and: "all failureHandlers are executed"
-        history == [
-            "mainClosure",
-            "failureHandler of no args",
-            "failureHandler of 1 arg as implicit 'it'",
-            "failureHandler of 1 arg as explicit 'domain'",
-            "failureHandler of 2 args",
-        ]
-    }
-
-    def "withOptimisticLock: can have a failureHandler Closure which receives null as 2nd argument when failed at version comparation"() {
-        when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, 0, [:]) { domain ->
-            assert false
-        }.onConflict { domain, caused ->
-            assert domain.is(testDomain)
-            assert caused == null
-            return "NG"
-        }
-
-        then:
-        result.returnValue == "NG"
-    }
-
-    def "withOptimisticLock: cannot have a failureHandler Closure which receives more than 3 arguments"() {
-        when:
-        OptimisticLocking.withOptimisticLock(testDomain, 0, [:]) { domain ->
-            assert false
-        }.onConflict { domain, caused, tooMany ->
-            assert false
-        }
-
-        then:
-        thrown(IllegalArgumentException)
-    }
-
     def "withOptimisticLock: doesn't bind default field error when errorBinding: false"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: false]) { domain ->
+        def result = testDomain.withOptimisticLock(errorBinding: false) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -285,7 +165,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: binds default field error when errorBinding: true explicitly"() {
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [errorBinding: true]) { domain ->
+        def result = testDomain.withOptimisticLock(errorBinding: true) { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -301,7 +181,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = true
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -317,7 +197,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = false
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 
@@ -333,7 +213,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = null
 
         when:
-        def result = OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+        def result = testDomain.withOptimisticLock { domain ->
             throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
         }
 

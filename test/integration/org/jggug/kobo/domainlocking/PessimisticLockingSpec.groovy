@@ -25,7 +25,7 @@ class PessimisticLockingSpec extends IntegrationSpec {
     private static final long NOT_FOUND_ID = 9999
     private static final String TEST_VALUE = "PessimisticLockingSpec's TEST_VALUE"
 
-    def transactional = false
+    static transactional = false
 
     def testDomain
 

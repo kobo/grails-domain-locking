@@ -27,7 +27,7 @@ class DomainLockingGrailsPlugin {
     def title = "Domain Locking"
     def author = "Yasuharu NAKANO"
     def authorEmail = "ynak@jggug.org"
-    def organization = [ name: "Japan Grails/Groovy User Group", url: "http://www.jggug.org/" ]
+    def organization = [name: "Japan Grails/Groovy User Group", url: "http://www.jggug.org/"]
     def license = "APACHE"
     def description = 'Provides an easy way to use optimistic/pessimistic lock.'
     def documentation = "http://kobo.github.com/grails-domain-locking/"
@@ -36,8 +36,17 @@ class DomainLockingGrailsPlugin {
 
     def doWithDynamicMethods = { applicationContext ->
         for (domainClass in application.domainClasses) {
-            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion = null, Closure mainClosure ->
-                OptimisticLocking.withOptimisticLock(delegate, modificationBaseVersion, mainClosure)
+            domainClass.metaClass.withOptimisticLock = { Closure mainClosure ->
+                OptimisticLocking.withOptimisticLock(delegate, null, [:], mainClosure)
+            }
+            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion, Closure mainClosure ->
+                OptimisticLocking.withOptimisticLock(delegate, modificationBaseVersion, [:], mainClosure)
+            }
+            domainClass.metaClass.withOptimisticLock = { Map params, Closure mainClosure ->
+                OptimisticLocking.withOptimisticLock(delegate, null, params, mainClosure)
+            }
+            domainClass.metaClass.withOptimisticLock = { modificationBaseVersion, Map params, Closure mainClosure ->
+                OptimisticLocking.withOptimisticLock(delegate, modificationBaseVersion, params, mainClosure)
             }
 
             domainClass.metaClass.static.withPessimisticLock = { Long lockingDomainId, Closure mainClosure ->
