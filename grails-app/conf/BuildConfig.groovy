@@ -41,7 +41,7 @@ grails.project.dependency.resolution = {
             export = false
             exclude "spock-grails-support"
         }
-        build(":improx:0.2") {
+        build(":improx:0.3") {
             export = false
         }
     }
