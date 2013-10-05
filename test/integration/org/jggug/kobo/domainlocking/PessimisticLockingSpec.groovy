@@ -252,7 +252,7 @@ class PessimisticLockingSpec extends IntegrationSpec {
         e.message == "mainClosure should not be null."
     }
 
-    def "withPessimisticLock: sequencially executes closure with lock"() {
+    def "withPessimisticLock: sequentially executes closure with lock"() {
         given:
         def threads = []
         def results = [] as CopyOnWriteArrayList
@@ -281,7 +281,7 @@ class PessimisticLockingSpec extends IntegrationSpec {
         then:
         results as List == ["OK"] * 5
 
-        and: "sequencially paired BEGIN/END"
+        and: "sequentially paired BEGIN/END"
         history.collect { it.value } == ["BEGIN", "END"] * 5
     }
 }
