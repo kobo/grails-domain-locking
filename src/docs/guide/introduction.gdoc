@@ -1,7 +1,7 @@
-Grails supports for optimistic locking at default by implicit @version@ property of domain class.
-When an user updates domain properties via user interface on browser, @version@'s value must be passed via hidden form and be checked properly at controller.
+Grails supports for optimistic locking by default with implicit @version@ property of domain class.
+When an user updates domain properties via user interface on browser, @version@'s value must be passed via hidden form and be checked properly at a controller recieved the form.
 
-In a scaffolded controller, the version of the domain instance is compared with the value which is used when displaying edit page.
+In a scaffolded controller of Grails 2.2.4, the version of the domain instance is compared with the value which is used when displaying the edit page, as follows:
 
 {code}
 def update(Long id, Long version) {
@@ -34,11 +34,9 @@ def update(Long id, Long version) {
 }
 {code}
 
-But the above code isn't enough to care about conflict of users' operations.
+But this code isn't enough to care about conflict of users' operations.
 After comparing version, @save@ method might cause a conflict error at the layer of Hibernate.
-
-
-To easy to reproduce a problem, append a @sleep@ line into the code.
+To easy to reproduce the problem, append a @sleep@ line into the code, like this:
 
 {code}
 def update(Long id, Long version) {
@@ -100,7 +98,7 @@ Message: Row was updated or deleted by another transaction (or unsaved-value map
 ^    722 | run       in java.lang.Thread
 {code}
 
-Yes. You must handle @org.springframework.dao.OptimisticLockingFailureException@ (wrapping @net.sf.hibernate.StateObjectStateException@) like the followings.
+Yes. You must handle @org.springframework.dao.OptimisticLockingFailureException@ (wrapping @net.sf.hibernate.StateObjectStateException@) like this:
 
 {code}
 def update(Long id, Long version) {
@@ -147,7 +145,7 @@ def update(Long id, Long version) {
 This works well but it's ugly because there are duplicated codes.
 
 
-You can write the code as follows by using Domain Locking plugin:
+If you use this plugin, you can just simply write the code as follows:
 
 {code}
 def update(Long id, Long version) {
@@ -177,4 +175,4 @@ def update(Long id, Long version) {
 }
 {code}
 
-@withOptimisticLock@ method compare the version and catch @OptimisticLockingFailureException@ and set a error message to domain instance on conflict.
+@withOptimisticLock@ method compare the version and catch @OptimisticLockingFailureException@ and set a field error with default message to domain instance on conflict.
