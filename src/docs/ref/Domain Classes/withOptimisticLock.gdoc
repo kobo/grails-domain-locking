@@ -7,7 +7,7 @@ h2. Purpose
 h2. Examples
 
 {code}
-sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+sampleDomain.withOptimisticLocking(modificationBaseVersion, [errorBinding: true]) { Object domain ->
 
     // Operations which might causes @OptimisticLockingFailureException@.
     // Here is invoked only when a version of modification base < current persistent version.

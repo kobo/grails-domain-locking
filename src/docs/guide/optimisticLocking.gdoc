@@ -111,3 +111,41 @@ def result = sampleDomain.withOptimisticLock(modificationBaseVersion) { Object d
 
 Otherwise, a conflict error occurs on flushing at outside of a controller action and you cannot handle the error.
 Instead, you will see the 500 error page if it's in development mode.
+
+
+h3. Field Error Binding
+
+By default, this plugin will bind a field error to an instance with a message code @default.optimistic.locking.failure@.
+If you don't want it because i18n message is unnecessary or you want to use your custom message code, you can disable it by @errorBinding@ parameter:
+
+{code}
+sampleDomain.withOptimisticLock(modificationBaseVersion, [errorBinding: false]) { Object domain ->
+    ...
+}
+{code}
+
+If @modificationBaseVersion@ is unnecessary, you can simply write it:
+
+{code}
+sampleDomain.withOptimisticLock(errorBinding: false) { Object domain ->
+    ...
+}
+{code}
+
+If you want use your custom message code, you can use Spring's API directly like this:
+
+{code}
+sampleDomain.withOptimisticLock(errorBinding: false) { Object domain ->
+    ...
+}.onConflict { Object domain ->
+    domain.errors.rejectValue("your.custom.code", [123] as Object[], "Default sample")
+}
+{code}
+
+The @errorBinding@ parameter is @true@ by default.
+So if you don't specify the parameter, the default field error will be bound.
+You can configure the default value in @Config.groovy@:
+
+{code}
+grails.plugins.domainlocking.defaultErrorBinding = false
+{code}
