@@ -1,52 +1,53 @@
 In order to handle optimistic locking, use @withOptimisticLock@ method which is injected to domain class by the plugin.
 
 - @withOptimisticLock@ method compares a version of modification base with current version.
--- @withOptimisticLocking@'s closure is invoked only when version of modification base < current persistent version is @true@.
-- When version of modification base < current persistent version is @false@ or @OptimisticLockingFailureException@ is catched,
--- it invokes @onConflict@ closure.
--- it sets error messages to the domain instance.
-- An exception except @OptimisticLockingFailureException@ is thrown untouched.
+-- @withOptimisticLock@'s closure is invoked only when "version of modification base" < "current persistent version" is @true@.
+- When "version of modification base" < "current persistent version" is @false@ or @OptimisticLockingFailureException@ is catched,
+-- it invokes @onConflict@ closure if exists.
+-- it sets a field error message to the domain instance.
+- When an exception except @OptimisticLockingFailureException@ is thrown, it's not caught and just thrown up.
 
 {code}
-sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+sampleDomain.withOptimisticLock(modificationBaseVersion) { Object domain ->
 
-    // operation which might causes @OptimisticLockingFailureException@.
+    // Operations which might causes @OptimisticLockingFailureException@.
     // Here is invoked only when a version of modification base < current persistent version.
 
 }.onConflict { Object domain, Throwable caused ->
 
-    // operation to handle a failure of optimistic locking
-    // e.g. to render edit page for re-input
+    // Operations to handle a failure of optimistic locking
+    // e.g. to render edit page to re-input
 }
 {code}
 
-See also [Optimistic and Pessimistic locking|http://grails.org/doc/latest/guide/single.html#locking].
+See also [Optimistic and Pessimistic locking|http://grails.org/doc/latest/guide/single.html#locking] of Grails User Guide.
 
 
 h3. Type of modificationBaseVersion
 
 @modificationBaseVersion@ allows either @Number@ (@Long@, @Integer@, etc.) or @String@.
-So you can pass the value of @params@ in controller.
+So you can pass a value of @params@ in a controller.
 
 
 h3. Skip a version comparation
 
-If a copmaration of version is unnecessary, you can ommit @modificationBaseVersion@ arguments as follows.
-In this case, the main closure will be always invoked.
+If a copmaration of version is unnecessary, you can omit the @modificationBaseVersion@ argument as follows:
 
 {code}
-sampleDomain.withOptimisticLocking { Object domain ->
+sampleDomain.withOptimisticLock { Object domain ->
     // Here is always invoked regardless of the versions.
 }
 {code}
 
+In this case, the main closure will be always invoked.
+
 
 h3. onConflict is optional
 
-If you don't have nothing to do for conflict, you can omit @onConflict@.
+If you have nothing to do when a conflict occurs, you can omit @onConflict@ closure:
 
 {code}
-sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+sampleDomain.withOptimisticLock(modificationBaseVersion) { Object domain ->
     // ...
 }
 {code}
@@ -56,29 +57,33 @@ In this case, when something fails, it just only set error message to domain cla
 
 h3. Closure arguments
 
-@domain@ equals to delegate object, namely @sampleDomain@. So you can use each one as you want.
+The first argument of the closure equals to delegate object. So you can use each one as you want.
 
 {code}
-sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+sampleDomain.withOptimisticLock(modificationBaseVersion) { Object domain ->
+    assert domain.is(sampleDomain)
+}.onConflict { Object domain ->
     assert domain.is(sampleDomain)
 }
 {code}
 
-arguments of @onConflict@'s closure are all optional. so you can omit them. The followings are all valid.
+All arguments of @onConflict@'s closure are optional.
+So you can omit them.
+The followings are all valid.
 
 {code}
-/* ... */.onConflict { Object domain, Throwable caused -> /* ... */ }
-/* ... */.onConflict { Object domain -> /* ... */ }
-/* ... */.onConflict { -> /* ... */ }
+sampleDomain.withOptimisticLock { /* ... */ }.onConflict { Object domain, Throwable caused -> /* ... */ }
+sampleDomain.withOptimisticLock { /* ... */ }.onConflict { Object domain -> /* ... */ }
+sampleDomain.withOptimisticLock { /* ... */ }.onConflict { -> /* ... */ }
 {code}
 
 
 h3. Return value
 
-If you want a return value from closure, you can receive it via @returnValue@ property.
+If you want to use a return value of a closure, you can get it from @returnValue@ property.
 
 {code}
-def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+def result = sampleDomain.withOptimisticLock(modificationBaseVersion) { Object domain ->
     return "OK"
 }.onConflict { Object domain, Throwable caused ->
     return "NG"
@@ -86,7 +91,7 @@ def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) { Objec
 assert result.returnValue == "OK"
 {code}
 
-In case of conflict, a return value of @onConflict@'s closure is returned.
+In case of a conflict, a return value of a @onConflict@'s closure is returned.
 {code}
 assert result.returnValue == "NG"
 {code}
@@ -97,12 +102,12 @@ h3. Flushing session
 In case of using persistence methods (e.g. @save@ method), you must be flush a session.
 
 {code}
-def result = sampleDomain.withOptimisticLocking(modificationBaseVersion) { Object domain ->
+def result = sampleDomain.withOptimisticLock(modificationBaseVersion) { Object domain ->
     domain.save(flush: true)
 }.onConflict { Object domain, Throwable caused ->
     return "NG" // In case of error, you can catch and handle it here.
 }
 {code}
 
-Otherwise, a conflict error occurs on flushing at outside of controller action and you cannot handle the error.
-Instead, you will see the 500 error page at development mode.
+Otherwise, a conflict error occurs on flushing at outside of a controller action and you cannot handle the error.
+Instead, you will see the 500 error page if it's in development mode.
