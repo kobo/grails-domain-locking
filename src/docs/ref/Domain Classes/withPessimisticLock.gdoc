@@ -9,11 +9,11 @@ h2. Examples
 {code}
 SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
 
-    // operation to require a pessimistic lock
+    // Operations to require a pessimistic lock
 
 }.onNotFound { ->
 
-    // operation when the target is not found
+    // Operations when the target is not found
 }
 {code}
 
