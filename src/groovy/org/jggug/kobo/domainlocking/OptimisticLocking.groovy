@@ -57,8 +57,12 @@ class OptimisticLocking {
     }
 
     private static Result handleFailure(domain, Map params, Throwable caused = null) {
-        def grailsApplication = Holders.applicationContext.grailsApplication
-        def defaultErrorBinding = grailsApplication.config.grails?.plugins?.domainlocking?.defaultErrorBinding
+        // NOTICE: If there is no entry in Config.groovy, it returns not NULL but EMPTY MAP.
+        // So only checking "null" if there is any configuration is wrong.
+        def defaultErrorBinding = Holders.applicationContext.grailsApplication.config.grails?.plugins?.domainlocking?.defaultErrorBinding
+        defaultErrorBinding = (defaultErrorBinding instanceof Map) ? null : defaultErrorBinding
+
+        // Only if error binding is necessary, do it.
         if (Util.notNullValue([params.errorBinding, defaultErrorBinding, true])) {
             bindFieldError(domain)
         }

@@ -316,8 +316,23 @@ class OptimisticLockingSpec extends IntegrationSpec {
         testDomain.hasErrors() == false
     }
 
-    def "withOptimisticLock: doesn't bind default field error when there is no errorBinding params and defaultErrorBinding is null in Config.groovy"() {
+    def "withOptimisticLock: doesn't bind default field error when there is no errorBinding params and no defaultErrorBinding in Config.groovy"() {
         given:
+        // NOTICE: If there is no entry in Config.groovy, it returns not null but EMPTY Map.
+        // So assignment of "null" is wrong way of clear the configuration.
+        grailsApplication.config.grails.plugins.domainlocking.clear()
+
+        when:
+        OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
+            throw new OptimisticLockingFailureException("EXCEPTION_FOR_TEST")
+        }
+
+        then:
+        assertFieldError(testDomain)
+    }
+
+    def "withOptimisticLock: doesn't bind default field error when there is no errorBinding params and defaultErrorBinding is null in Config.groovy"() {
+        given: "explicitly specifying null"
         grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = null
 
         when:
