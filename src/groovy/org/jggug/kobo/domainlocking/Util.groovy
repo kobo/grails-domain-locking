@@ -24,10 +24,18 @@ class Util {
         }
     }
 
-    static void shouldNotNull(argMaps) {
+    static void shouldNotNull(Map argMaps) {
         argMaps.each { name, value ->
             if (value == null) throw new IllegalArgumentException("${name} should not be null.")
         }
     }
+
+    static notNullValue(Iterable values) {
+        for (value in values) {
+            if (value != null) return value
+        }
+        return null
+    }
+
 }
 

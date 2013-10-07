@@ -13,10 +13,10 @@
  */
 
 package org.jggug.kobo.domainlocking
-import grails.plugin.spock.UnitSpec
-import org.jggug.kobo.domainlocking.Util
 
-class UtilSpec extends UnitSpec {
+import spock.lang.Specification
+
+class UtilSpec extends Specification {
 
     def "convertToLong: converts to long or null from any types"() {
         when:
@@ -42,5 +42,50 @@ class UtilSpec extends UnitSpec {
         ""           | null
         null         | null
         new Object() | null
+    }
+
+    def "shouldNotNull: throws an exception when arguments have one or more null"() {
+        when:
+        Util.shouldNotNull(args)
+
+        then:
+        IllegalArgumentException e = thrown()
+        assert e.message == message
+
+        where:
+        args                        | message
+        [a: null]                   | "a should not be null."
+        [a: 1, b: null, c: 3]       | "b should not be null."
+        [a: null, b: null, c: null] | "a should not be null."
+
+    }
+
+    def "shouldNotNull: does nothing when arguments don't have any null"() {
+        when:
+        Util.shouldNotNull(args)
+
+        then:
+        noExceptionThrown()
+
+        where:
+        args << [
+            [:],
+            [a: 1],
+            [a: 1, b: 2, c: 3],
+        ]
+    }
+
+    def "notNullValue: returns first non-null value from arguments"() {
+        expect:
+        Util.notNullValue(args) == value
+
+        where:
+        args               | value
+        [1, 2, 3]          | 1
+        [null, 2, 3]       | 2
+        [null, null, 3]    | 3
+        [null, null, null] | null
+        [null]             | null
+        []                 | null
     }
 }

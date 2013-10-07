@@ -59,17 +59,10 @@ class OptimisticLocking {
     private static Result handleFailure(domain, Map params, Throwable caused = null) {
         def grailsApplication = Holders.applicationContext.grailsApplication
         def defaultErrorBinding = grailsApplication.config.grails?.plugins?.domainlocking?.defaultErrorBinding
-        if (notNullValue(params.errorBinding, defaultErrorBinding, true)) {
+        if (Util.notNullValue([params.errorBinding, defaultErrorBinding, true])) {
             bindFieldError(domain)
         }
         return new Result(returnValue: null, domain: domain, succeed: false, caused: caused)
-    }
-
-    private static notNullValue(Object... values) {
-        for (value in values) {
-            if (value != null) return value
-        }
-        return null
     }
 
     private static bindFieldError(domain) {
