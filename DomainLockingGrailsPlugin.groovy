@@ -17,7 +17,7 @@ import org.jggug.kobo.domainlocking.PessimisticLocking
 
 class DomainLockingGrailsPlugin {
 
-    def version = "0.4"
+    def version = "0.5-SNAPSHOT"
     def grailsVersion = "2.0 > *"
     def pluginExcludes = [
         "grails-app/domain/test/TestDomain.groovy",
