@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Domain Locking 0.3</title>
+    <title>Domain Locking 0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -47,7 +47,7 @@ function addJsClass(el) {
         
         
     </div>
-    <p>Provides an easy way to use optimistic/pessimistic lock.</p>
+    <p>Provides easy ways to use optimistic/pessimistic lock.</p>
 </div>
 
 
@@ -58,9 +58,9 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>withOptimisticLock</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/><code>withOptimisticLock</code> method provides an easy way to use a optimistic lock.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;<p class="paragraph"/>    // operation which might causes <code>OptimisticLockingFailureException</code>.
-    // Here is invoked only when a version of modification base &#60; current persistent version.<p class="paragraph"/>&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;<p class="paragraph"/>    // operation to handle a failure of optimistic locking
-    // e.g. to render edit page <span class="java&#45;keyword">for</span> re&#45;input
+                <h1>withOptimisticLock</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/><code>withOptimisticLock</code> method provides an easy way to use a optimistic lock.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>sampleDomain.withOptimisticLocking(modificationBaseVersion, &#91;errorBinding: <span class="java&#45;keyword">true</span>&#93;) &#123; <span class="java&#45;object">Object</span> domain &#45;&#62;<p class="paragraph"/>    // Operations which might causes <code>OptimisticLockingFailureException</code>.
+    // Here is invoked only when a version of modification base &#60; current persistent version.<p class="paragraph"/>&#125;.onConflict &#123; <span class="java&#45;object">Object</span> domain, Throwable caused &#45;&#62;<p class="paragraph"/>    // Operations to handle a failure of optimistic locking
+    // e.g. to render edit page to re&#45;input
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>See also <a href="../../guide/single.html#optimisticLocking" class="guide">Optimistic Locking</a>.
 
             </div>

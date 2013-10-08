@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>1 Introduction 0.3</title>
+    <title>1 Introduction 0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -46,7 +46,7 @@ function addJsClass() {
         
         
     </div>
-    <p>Provides an easy way to use optimistic/pessimistic lock.</p>
+    <p>Provides easy ways to use optimistic/pessimistic lock.</p>
 </div>
 
 
@@ -69,7 +69,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Yasuharu NAKANO</p>
 
-                    <p><strong>Version:</strong> 0.3</p>
+                    <p><strong>Version:</strong> 0.4</p>
 
                     
                 </div>
@@ -79,8 +79,8 @@ function addJsClass() {
                 
 
 <h1 id="introduction">1 Introduction</h1>
-Grails supports for optimistic locking at default by implicit <code>version</code> property of domain class.
-When an user updates domain properties via user interface on browser, <code>version</code>'s value must be passed via hidden form and be checked properly at controller.<p class="paragraph"/>In a scaffolded controller, the version of the domain instance is compared with the value which is used when displaying edit page.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+Grails supports for optimistic locking by default with implicit <code>version</code> property of domain class.
+When an user updates domain properties via user interface on browser, <code>version</code>'s value must be passed via hidden form and be checked properly at a controller recieved the form.<p class="paragraph"/>In a scaffolded controller of Grails 2.2.4, the version of the domain instance is compared with the value which is used when displaying the edit page, as follows:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
     def sampleInstance = Sample.get(id)
     <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
         flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
@@ -99,9 +99,9 @@ When an user updates domain properties via user interface on browser, <code>vers
         <span class="java&#45;keyword">return</span>
     &#125;<p class="paragraph"/>    flash.message = message(code: '<span class="java&#45;keyword">default</span>.updated.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), sampleInstance.id&#93;)
     redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)
-&#125;</pre></div><p class="paragraph"/>But the above code isn't enough to care about conflict of users' operations.
-After comparing version, <code>save</code> method might cause a conflict error at the layer of Hibernate.<p class="paragraph"/>
-To easy to reproduce a problem, append a <code>sleep</code> line into the code.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+&#125;</pre></div><p class="paragraph"/>But this code isn't enough to care about conflict of users' operations.
+After comparing version, <code>save</code> method might cause a conflict error at the layer of Hibernate.
+To easy to reproduce the problem, append a <code>sleep</code> line into the code, like this:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
     def sampleInstance = Sample.get(id)
     <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
         flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
@@ -140,7 +140,7 @@ Message: Row was updated or deleted by another transaction (or unsaved&#45;value
 |     63 | doFilter  in grails.plugin.cache.web.filter.AbstractFilter
 |   1145 | runWorker in java.util.concurrent.ThreadPoolExecutor
 |    615 | run . . . in java.util.concurrent.ThreadPoolExecutor$Worker
-^    722 | run       in java.lang.<span class="java&#45;object">Thread</span></pre></div><p class="paragraph"/>Yes. You must handle <code>org.springframework.dao.OptimisticLockingFailureException</code> (wrapping <code>net.sf.hibernate.StateObjectStateException</code>) like the followings.<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+^    722 | run       in java.lang.<span class="java&#45;object">Thread</span></pre></div><p class="paragraph"/>Yes. You must handle <code>org.springframework.dao.OptimisticLockingFailureException</code> (wrapping <code>net.sf.hibernate.StateObjectStateException</code>) like this:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
     def sampleInstance = Sample.get(id)
     <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
         flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
@@ -167,7 +167,7 @@ Message: Row was updated or deleted by another transaction (or unsaved&#45;value
         render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
     &#125;
 &#125;</pre></div><p class="paragraph"/>This works well but it's ugly because there are duplicated codes.<p class="paragraph"/>
-You can write the code as follows by using Domain Locking plugin:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
+If you use this plugin, you can just simply write the code as follows:<p class="paragraph"/><div class="code"><pre>def update(<span class="java&#45;object">Long</span> id, <span class="java&#45;object">Long</span> version) &#123;
     def sampleInstance = Sample.get(id)
     <span class="java&#45;keyword">if</span> (!sampleInstance) &#123;
         flash.message = message(code: '<span class="java&#45;keyword">default</span>.not.found.message', args: &#91;message(code: 'sample.label', <span class="java&#45;keyword">default</span>: 'Sample'), id&#93;)
@@ -181,7 +181,7 @@ You can write the code as follows by using Domain Locking plugin:<p class="parag
         redirect(action: <span class="java&#45;quote">"show"</span>, id: sampleInstance.id)<p class="paragraph"/>    &#125;.onConflict &#123; domain &#45;&#62;
         render(view: <span class="java&#45;quote">"edit"</span>, model: &#91;sampleInstance: sampleInstance&#93;)
     &#125;
-&#125;</pre></div><p class="paragraph"/><code>withOptimisticLock</code> method compare the version and catch <code>OptimisticLockingFailureException</code> and set a error message to domain instance on conflict.
+&#125;</pre></div><p class="paragraph"/><code>withOptimisticLock</code> method compare the version and catch <code>OptimisticLockingFailureException</code> and set a field error with default message to domain instance on conflict.
 
 
 

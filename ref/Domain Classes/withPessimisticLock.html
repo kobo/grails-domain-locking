@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>Domain Locking 0.3</title>
+    <title>Domain Locking 0.4</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -47,7 +47,7 @@ function addJsClass(el) {
         
         
     </div>
-    <p>Provides an easy way to use optimistic/pessimistic lock.</p>
+    <p>Provides easy ways to use optimistic/pessimistic lock.</p>
 </div>
 
 
@@ -58,7 +58,7 @@ function addJsClass(el) {
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
-                <h1>withPessimisticLock</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/><code>withPessimisticLock</code> method provides an easy way to use a pessimistic lock.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;<p class="paragraph"/>    // operation to require a pessimistic lock<p class="paragraph"/>&#125;.onNotFound &#123; &#45;&#62;<p class="paragraph"/>    // operation when the target is not found
+                <h1>withPessimisticLock</h1><p class="paragraph"/><h2>Purpose</h2><p class="paragraph"/><code>withPessimisticLock</code> method provides an easy way to use a pessimistic lock.<p class="paragraph"/><h2>Examples</h2><p class="paragraph"/><div class="code"><pre>SampleDomain.withPessimisticLock(id) &#123; <span class="java&#45;object">Object</span> lockedDomain &#45;&#62;<p class="paragraph"/>    // Operations to require a pessimistic lock<p class="paragraph"/>&#125;.onNotFound &#123; &#45;&#62;<p class="paragraph"/>    // Operations when the target is not found
 &#125;</pre></div><p class="paragraph"/><h2>Description</h2><p class="paragraph"/>See also <a href="../../guide/single.html#pessimisticLocking" class="guide">Pessimistic Locking</a>.
 
             </div>
