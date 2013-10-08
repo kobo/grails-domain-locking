@@ -30,7 +30,6 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def setup() {
         assert TestDomain.list() == []
-
         TestDomain.withNewSession {
             TestDomain.withNewTransaction {
                 // saving TestDomain
@@ -44,7 +43,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
             }
         }
 
-        grailsApplication.config.grails.plugins.domainlocking.defaultErrorBinding = true
+        cleanupConfig()
     }
 
     def cleanup() {
@@ -53,6 +52,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
                 TestDomain.list()*.delete(flush: true)
             }
         }
+        cleanupConfig()
     }
 
     @Unroll
@@ -318,9 +318,7 @@ class OptimisticLockingSpec extends IntegrationSpec {
 
     def "withOptimisticLock: doesn't bind default field error when there is no errorBinding params and no defaultErrorBinding in Config.groovy"() {
         given:
-        // NOTICE: If there is no entry in Config.groovy, it returns not null but EMPTY Map.
-        // So assignment of "null" is wrong way of clear the configuration.
-        grailsApplication.config.grails.plugins.domainlocking.clear()
+        cleanupConfig()
 
         when:
         OptimisticLocking.withOptimisticLock(testDomain, null, [:]) { domain ->
@@ -349,5 +347,11 @@ class OptimisticLockingSpec extends IntegrationSpec {
         def errors = domain.errors.getFieldErrors("version")
         assert errors.size() == 1
         assert errors[0].codes.toList().contains(code)
+    }
+
+    private void cleanupConfig() {
+        // NOTICE: If there is no entry in Config.groovy, it returns not null but EMPTY Map.
+        // So assignment of "null" is wrong way of clear the configuration.
+        grailsApplication.config.grails.plugins.domainlocking.clear()
     }
 }
