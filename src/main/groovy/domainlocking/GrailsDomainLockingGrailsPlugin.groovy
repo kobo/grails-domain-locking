@@ -1,4 +1,4 @@
-package org.jggug.kobo.domainlocking
+package domainlocking
 
 import grails.plugins.Plugin
 

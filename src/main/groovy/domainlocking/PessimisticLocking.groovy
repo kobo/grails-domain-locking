@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-package org.jggug.kobo.domainlocking
+package domainlocking
 
 import groovy.util.logging.Commons
 

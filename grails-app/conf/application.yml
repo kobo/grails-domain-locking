@@ -2,7 +2,7 @@
 grails:
     profile: web-plugin
     codegen:
-        defaultPackage: org.jggug.kobo.domainlocking
+        defaultPackage: domainlocking
 info:
     app:
         name: '@info.app.name@'
