@@ -20,7 +20,6 @@ import org.springframework.dao.OptimisticLockingFailureException
 import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
 import spock.lang.Unroll
-import test.TestDomain
 
 @Integration
 @Transactional

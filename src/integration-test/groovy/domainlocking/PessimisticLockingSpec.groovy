@@ -18,7 +18,6 @@ import grails.test.mixin.integration.Integration
 import grails.util.Holders
 import org.springframework.transaction.annotation.Transactional
 import spock.lang.Specification
-import test.TestDomain
 
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch

@@ -6,7 +6,6 @@ class GrailsDomainLockingGrailsPlugin extends Plugin {
 
     def grailsVersion = "3.0 > *"
     def pluginExcludes = [
-        "grails-app/domain/test/**",
         "grails-app/views/**",
         "src/docs/**",
     ]
