@@ -1,0 +1,22 @@
+h1. withPessimisticLock
+
+h2. Purpose
+
+@withPessimisticLock@ method provides an easy way to use a pessimistic lock.
+
+h2. Examples
+
+{code}
+SampleDomain.withPessimisticLock(id) { Object lockedDomain ->
+
+    // Operations to require a pessimistic lock
+
+}.onNotFound { ->
+
+    // Operations when the target is not found
+}
+{code}
+
+h2. Description
+
+See also [Pessimistic Locking|guide:pessimisticLocking].

@@ -1,0 +1,24 @@
+h1. withOptimisticLock
+
+h2. Purpose
+
+@withOptimisticLock@ method provides an easy way to use a optimistic lock.
+
+h2. Examples
+
+{code}
+sampleDomain.withOptimisticLocking(modificationBaseVersion, [errorBinding: true]) { Object domain ->
+
+    // Operations which might causes @OptimisticLockingFailureException@.
+    // Here is invoked only when a version of modification base < current persistent version.
+
+}.onConflict { Object domain, Throwable caused ->
+
+    // Operations to handle a failure of optimistic locking
+    // e.g. to render edit page to re-input
+}
+{code}
+
+h2. Description
+
+See also [Optimistic Locking|guide:optimisticLocking].
