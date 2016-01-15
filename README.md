@@ -29,7 +29,7 @@ TBD
 Code Status
 -----------
 
-[![Build Status](https://travis-ci.org/nobeans/grails-domain-locking.svg?branch=master)](https://travis-ci.org/nobeans/grails-request-tracelog)
+[![Build Status](https://travis-ci.org/kobo/grails-domain-locking.svg?branch=master)](https://travis-ci.org/kobo/grails-request-tracelog)
 
 
 License
