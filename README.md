@@ -1,5 +1,5 @@
-Request Tracelog Plugin for Grails 3
-====================================
+Domain Locking Plugin for Grails 3
+==================================
 
 This is a Grails 3 plugin to provide an easy way to use optimistic/pessimistic locking.
 
@@ -29,7 +29,7 @@ TBD
 Code Status
 -----------
 
-[![Build Status](https://travis-ci.org/kobo/grails-domain-locking.svg?branch=master)](https://travis-ci.org/kobo/grails-request-tracelog)
+[![Build Status](https://travis-ci.org/kobo/grails-domain-locking.svg?branch=master)](https://travis-ci.org/kobo/grails-domain-locking)
 
 
 License
